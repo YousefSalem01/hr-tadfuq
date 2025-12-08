@@ -15,9 +15,10 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import HrChip from '../../uikit/HrChip/HrChip';
 
 interface NavItem {
-  icon: React.ReactNode;
+  icon: any;
   label: string;
   path: string;
 }
@@ -27,16 +28,16 @@ const Sidebar = () => {
   const location = useLocation();
 
   const navItems: NavItem[] = [
-    { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
-    { icon: <Users size={20} />, label: 'Employees', path: '/employees' },
-    { icon: <Calendar size={20} />, label: 'Attendance', path: '/attendance' },
-    { icon: <FileText size={20} />, label: 'Leaves', path: '/leaves' },
-    { icon: <DollarSign size={20} />, label: 'Payroll', path: '/payroll' },
-    { icon: <Receipt size={20} />, label: 'Advance', path: '/advance' },
-    { icon: <FolderOpen size={20} />, label: 'Documents', path: '/documents' },
-    { icon: <Building2 size={20} />, label: 'Departments', path: '/departments' },
-    { icon: <Shield size={20} />, label: 'Users', path: '/users' },
-    { icon: <History size={20} />, label: 'Activity Log', path: '/activity-log' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: Users, label: 'Employees', path: '/employees' },
+    { icon: Calendar, label: 'Attendance', path: '/attendance' },
+    { icon: FileText, label: 'Leaves', path: '/leaves' },
+    { icon: DollarSign, label: 'Payroll', path: '/payroll' },
+    { icon: Receipt, label: 'Advance', path: '/advance' },
+    { icon: FolderOpen, label: 'Documents', path: '/documents' },
+    { icon: Building2, label: 'Departments', path: '/departments' },
+    { icon: Shield, label: 'Users', path: '/users' },
+    { icon: History, label: 'Activity Log', path: '/activity-log' },
   ];
 
   return (
@@ -69,17 +70,14 @@ const Sidebar = () => {
         {navItems.map((item, index) => {
           const isActive = location.pathname === item.path;
           return (
-            <Link
-              key={index}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-primary text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              {item.icon}
-              {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+            <Link key={index} to={item.path}>
+              <HrChip
+                icon={item.icon}
+                variant={isActive ? 'active' : 'default'}
+                collapsed={collapsed}
+              >
+                {item.label}
+              </HrChip>
             </Link>
           );
         })}
@@ -87,19 +85,15 @@ const Sidebar = () => {
 
       {/* Bottom Section */}
       <div className="p-4 border-t space-y-1">
-        <a
-          href="#"
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors ${collapsed ? 'justify-center' : ''}`}
-        >
-          <Settings size={20} />
-          {!collapsed && <span className="text-sm font-medium">Settings</span>}
+        <a href="#">
+          <HrChip icon={Settings} collapsed={collapsed}>
+            Settings
+          </HrChip>
         </a>
-        <Link
-          to="/login"
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-primary hover:bg-red-50 transition-colors ${collapsed ? 'justify-center' : ''}`}
-        >
-          <LogOut size={20} />
-          {!collapsed && <span className="text-sm font-medium">Log out</span>}
+        <Link to="/login">
+          <HrChip icon={LogOut} collapsed={collapsed} className="text-primary hover:bg-red-50">
+            Log out
+          </HrChip>
         </Link>
       </div>
     </div>
