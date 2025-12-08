@@ -13,38 +13,28 @@ import {
   ChevronRight
 } from 'lucide-react';
 import AddAdvanceModal from '../../components/AddAdvanceModal';
-
-interface AdvanceRecord {
-  id: number;
-  employeeName: string;
-  amount: number;
-  monthlyDeduction: number;
-  remaining: number;
-  startDate: string;
-  endDate: string;
-  status: 'Active' | 'Pending' | 'Hold';
-}
-
-const advanceRecords: AdvanceRecord[] = [
-  { id: 1, employeeName: 'Olivia Rhye', amount: 7000, monthlyDeduction: 5000, remaining: 900, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 2, employeeName: 'Liam Smith', amount: 9000, monthlyDeduction: 4500, remaining: 1000, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Pending' },
-  { id: 3, employeeName: 'Ava Johnson', amount: 5000, monthlyDeduction: 5200, remaining: 800, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 4, employeeName: 'Noah Brown', amount: 5000, monthlyDeduction: 5500, remaining: 1200, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Hold' },
-  { id: 5, employeeName: 'Isabella Davis', amount: 6000, monthlyDeduction: 4800, remaining: 750, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 6, employeeName: 'Mason Wilson', amount: 5000, monthlyDeduction: 4900, remaining: 1150, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 7, employeeName: 'Sophia Garcia', amount: 5000, monthlyDeduction: 5300, remaining: 950, startDate: 'Nov 1, 2025', endDate: 'Nov 1, 2025', status: 'Pending' },
-];
+import { mockAdvanceRecords, AdvanceRecord } from '../../data/mock';
 
 const Advance = () => {
+  const [advanceRecords, setAdvanceRecords] = useState<AdvanceRecord[]>(mockAdvanceRecords);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(advanceRecords.length / itemsPerPage);
 
   const handleAddAdvance = (data: any) => {
-    // Handle advance creation
-    console.log('Advance data:', data);
-    // You can add the advance record to the list here
+    const newAdvance: AdvanceRecord = {
+      id: advanceRecords.length + 1,
+      employeeName: data.employeeName,
+      amount: data.amount,
+      monthlyDeduction: data.monthlyDeduction,
+      remaining: data.amount,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      status: 'Pending',
+    };
+    setAdvanceRecords([...advanceRecords, newAdvance]);
+    setIsModalOpen(false);
   };
 
   const getInitials = (name: string) => {

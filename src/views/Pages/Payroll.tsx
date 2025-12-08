@@ -13,105 +13,65 @@ import {
   Plus
 } from 'lucide-react';
 import CreatePayrollModal from '../../components/CreatePayrollModal';
-import { payrollAPI, employeesAPI } from '../../services/api';
-
-interface PayrollRecord {
-  id: number;
-  employee_name?: string;
-  employeeName?: string;
-  month: string;
-  basic_salary?: number;
-  basicSalary?: number;
-  allowances: number;
-  deductions: number;
-  net_pay?: number;
-  netPay?: number;
-  status: 'Active' | 'On Leave' | 'Inactive';
-}
+import { mockPayrollRecords, mockEmployees, PayrollRecord } from '../../data/mock';
 
 const Payroll = () => {
+  const [allPayrollRecords, setAllPayrollRecords] = useState<PayrollRecord[]>(mockPayrollRecords);
   const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [employees] = useState(mockEmployees);
   const itemsPerPage = 10;
 
-  const fetchPayrolls = async () => {
-    try {
-      setIsLoading(true);
-      const response = await payrollAPI.getAll({
-        page: currentPage,
-        per_page: itemsPerPage,
-        month: selectedMonth || undefined,
-        search: searchTerm || undefined,
-      });
-
-      if (response.success) {
-        const mapped = response.data.map((record: any) => ({
-          ...record,
-          employeeName: record.employee_name || record.employeeName,
-          basicSalary: record.basic_salary || record.basicSalary,
-          netPay: record.net_pay || record.netPay,
-        }));
-        setPayrollRecords(mapped);
-        
-        if (response.pagination) {
-          setTotalPages(response.pagination.total_pages);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching payroll:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await employeesAPI.getAll({ per_page: 1000 });
-      if (response.success) {
-        setEmployees(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchPayrolls();
-    fetchEmployees();
-  }, [currentPage, searchTerm, selectedMonth]);
+    // Filter payroll records based on search term and month
+    let filtered = allPayrollRecords;
 
-  const handleCreatePayroll = async (data: any) => {
-    try {
-      // Find employee ID from name
-      const employee = employees.find(emp => emp.name === data.employeeName);
-      if (!employee) {
-        alert('Employee not found');
-        return;
-      }
-
-      const response = await payrollAPI.create({
-        employee_id: employee.id,
-        month: data.month,
-        basic_salary: data.basicSalary,
-        allowances: data.allowances || 0,
-        deductions: data.deductions || 0,
-        status: data.status || 'Active',
-      });
-
-      if (response.success) {
-        fetchPayrolls();
-        setIsModalOpen(false);
-      }
-    } catch (error) {
-      console.error('Error creating payroll:', error);
-      alert('Failed to create payroll. Please try again.');
+    if (searchTerm) {
+      filtered = filtered.filter(record =>
+        (record.employeeName || record.employee_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
+
+    if (selectedMonth) {
+      filtered = filtered.filter(record => record.month === selectedMonth);
+    }
+
+    // Pagination
+    const totalPagesCalc = Math.ceil(filtered.length / itemsPerPage);
+    setTotalPages(totalPagesCalc);
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setPayrollRecords(filtered.slice(startIndex, endIndex));
+  }, [searchTerm, selectedMonth, currentPage, allPayrollRecords]);
+
+  const handleCreatePayroll = (data: any) => {
+    const employee = employees.find(emp => emp.name === data.employeeName);
+    if (!employee) {
+      alert('Employee not found');
+      return;
+    }
+
+    const netPay = (data.basicSalary || 0) + (data.allowances || 0) - (data.deductions || 0);
+    
+    const newPayroll: PayrollRecord = {
+      id: allPayrollRecords.length + 1,
+      employeeName: data.employeeName,
+      month: data.month,
+      basicSalary: data.basicSalary,
+      allowances: data.allowances || 0,
+      deductions: data.deductions || 0,
+      netPay: netPay,
+      status: data.status || 'Active',
+    };
+
+    setAllPayrollRecords([...allPayrollRecords, newPayroll]);
+    setIsModalOpen(false);
   };
 
   const getInitials = (name: string) => {

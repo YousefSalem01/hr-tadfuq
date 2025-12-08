@@ -13,37 +13,27 @@ import {
   ChevronRight
 } from 'lucide-react';
 import AddDocumentsModal from '../../components/AddDocumentsModal';
-
-interface DocumentRecord {
-  id: number;
-  employeeName: string;
-  documentType: string;
-  issuer: string;
-  issueDate: string;
-  expiryDate: string;
-  status: 'Active' | 'Pending' | 'Hold' | 'Expired';
-}
-
-const documentRecords: DocumentRecord[] = [
-  { id: 1, employeeName: 'Olivia Rhye', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 2, employeeName: 'Liam Smith', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Pending' },
-  { id: 3, employeeName: 'Ava Johnson', documentType: 'Certificate', issuer: 'UAE Immigration', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 4, employeeName: 'Noah Brown', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Hold' },
-  { id: 5, employeeName: 'Isabella Davis', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 6, employeeName: 'Mason Wilson', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Active' },
-  { id: 7, employeeName: 'Sophia Garcia', documentType: 'Certificate', issuer: 'UAE Government', issueDate: 'Nov 1, 2025', expiryDate: 'Nov 1, 2025', status: 'Pending' },
-];
+import { mockDocuments, DocumentRecord } from '../../data/mock';
 
 const Documents = () => {
+  const [documentRecords, setDocumentRecords] = useState<DocumentRecord[]>(mockDocuments);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(documentRecords.length / itemsPerPage);
 
   const handleAddDocument = (data: any) => {
-    // Handle document creation
-    console.log('Document data:', data);
-    // You can add the document record to the list here
+    const newDocument: DocumentRecord = {
+      id: documentRecords.length + 1,
+      employeeName: data.employeeName,
+      documentType: data.documentType,
+      issuer: data.issuer,
+      issueDate: data.issueDate,
+      expiryDate: data.expiryDate,
+      status: 'Pending',
+    };
+    setDocumentRecords([...documentRecords, newDocument]);
+    setIsModalOpen(false);
   };
 
   const getInitials = (name: string) => {

@@ -12,23 +12,19 @@ import {
   UserX,
   Calendar
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { mockAttendanceChartData, mockAttendanceStats } from '../../data/mock';
 
 const Attendance = () => {
-  const [selectedDate, setSelectedDate] = useState('Today');
-
-  // Chart data
-  const chartData = [
-    { name: 'Present', value: 40, color: '#10B981' },
-    { name: 'Absent', value: 60, color: '#DC2626' },
-  ];
+  const [selectedDate] = useState('Today');
+  const chartData = mockAttendanceChartData;
 
   const attendanceStats = [
-    { label: 'Total', value: '124', icon: <Users className="text-primary" size={24} />, color: 'text-primary' },
-    { label: 'Present', value: '0', icon: <UserCheck className="text-green-600" size={24} />, color: 'text-green-600' },
-    { label: 'Late', value: '0', icon: <AlertCircle className="text-yellow-600" size={24} />, color: 'text-yellow-600' },
-    { label: 'Remote', value: '0', icon: <Laptop className="text-yellow-600" size={24} />, color: 'text-yellow-600' },
-    { label: 'Absent', value: '0', icon: <UserX className="text-red-600" size={24} />, color: 'text-red-600' },
+    { label: 'Total', value: mockAttendanceStats.total.toString(), icon: <Users className="text-primary" size={24} />, color: 'text-primary' },
+    { label: 'Present', value: mockAttendanceStats.present.toString(), icon: <UserCheck className="text-green-600" size={24} />, color: 'text-green-600' },
+    { label: 'Late', value: mockAttendanceStats.late.toString(), icon: <AlertCircle className="text-yellow-600" size={24} />, color: 'text-yellow-600' },
+    { label: 'Remote', value: mockAttendanceStats.remote.toString(), icon: <Laptop className="text-yellow-600" size={24} />, color: 'text-yellow-600' },
+    { label: 'Absent', value: mockAttendanceStats.absent.toString(), icon: <UserX className="text-red-600" size={24} />, color: 'text-red-600' },
   ];
 
   return (

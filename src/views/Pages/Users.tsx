@@ -3,7 +3,6 @@ import {
   Plus, 
   Search, 
   Filter, 
-  ChevronDown, 
   Users as UsersIcon,
   Shield,
   Edit,
@@ -16,41 +15,11 @@ import EditUserModal from '../../components/EditUserModal';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 import PermissionModal from '../../components/PermissionModal';
 import AddRoleModal from '../../components/AddRoleModal';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: 'Active' | 'Inactive';
-  permissions: string[];
-}
-
-interface Role {
-  id: number;
-  name: string;
-  description: string;
-  permissions: string[];
-  userCount: number;
-}
-
-const initialUsers: User[] = [
-  { id: 1, name: 'Mohamed Ali', email: 'mohamed.ali@company.com', role: 'Admin', status: 'Active', permissions: ['All'] },
-  { id: 2, name: 'Sarah Ahmed', email: 'sarah.ahmed@company.com', role: 'HR Manager', status: 'Active', permissions: ['Employees', 'Leaves', 'Payroll'] },
-  { id: 3, name: 'Ahmed Hassan', email: 'ahmed.hassan@company.com', role: 'Manager', status: 'Active', permissions: ['Employees', 'Attendance'] },
-  { id: 4, name: 'Fatima Ali', email: 'fatima.ali@company.com', role: 'Employee', status: 'Active', permissions: ['View Only'] },
-];
-
-const initialRoles: Role[] = [
-  { id: 1, name: 'Admin', description: 'Full system access', permissions: ['All'], userCount: 1 },
-  { id: 2, name: 'HR Manager', description: 'HR operations management', permissions: ['Employees', 'Leaves', 'Payroll', 'Documents'], userCount: 1 },
-  { id: 3, name: 'Manager', description: 'Team management', permissions: ['Employees', 'Attendance', 'Leaves'], userCount: 1 },
-  { id: 4, name: 'Employee', description: 'Basic access', permissions: ['View Only'], userCount: 1 },
-];
+import { mockUsers, mockRoles, User, Role } from '../../data/mock';
 
 const Users = () => {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [roles, setRoles] = useState<Role[]>(mockRoles);
   const [activeTab, setActiveTab] = useState<'users' | 'roles'>('users');
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
@@ -58,7 +27,6 @@ const Users = () => {
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const getInitials = (name: string) => {
     return name

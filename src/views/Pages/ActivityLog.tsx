@@ -4,7 +4,6 @@ import {
   Filter, 
   ChevronDown,
   UserPlus,
-  UserMinus,
   Edit,
   Trash2,
   FileText,
@@ -12,143 +11,11 @@ import {
   Clock,
   User
 } from 'lucide-react';
-
-interface ActivityLog {
-  id: number;
-  action: 'Created' | 'Updated' | 'Deleted' | 'Logged In' | 'Logged Out' | 'Permission Changed';
-  entity: string;
-  entityName: string;
-  user: string;
-  userEmail: string;
-  timestamp: string;
-  details?: string;
-}
-
-const activityLogs: ActivityLog[] = [
-  { 
-    id: 1, 
-    action: 'Created', 
-    entity: 'Employee', 
-    entityName: 'John Doe', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-15 10:30:25',
-    details: 'Added new employee with role: Product Designer'
-  },
-  { 
-    id: 2, 
-    action: 'Updated', 
-    entity: 'Department', 
-    entityName: 'Engineering', 
-    user: 'Sarah Ahmed', 
-    userEmail: 'sarah.ahmed@company.com',
-    timestamp: '2024-01-15 09:15:42',
-    details: 'Updated department head to: Mohamed Ahmed'
-  },
-  { 
-    id: 3, 
-    action: 'Deleted', 
-    entity: 'Leave Request', 
-    entityName: 'Annual Leave - Phoenix Baker', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-15 08:45:10',
-    details: 'Deleted leave request for dates: Nov 1-5, 2025'
-  },
-  { 
-    id: 4, 
-    action: 'Created', 
-    entity: 'Payroll', 
-    entityName: 'January 2024 - Olivia Rhye', 
-    user: 'Sarah Ahmed', 
-    userEmail: 'sarah.ahmed@company.com',
-    timestamp: '2024-01-14 16:20:33',
-    details: 'Created payroll record: $5,500'
-  },
-  { 
-    id: 5, 
-    action: 'Permission Changed', 
-    entity: 'User', 
-    entityName: 'Ahmed Hassan', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-14 14:10:18',
-    details: 'Updated permissions: Added Employees, Attendance access'
-  },
-  { 
-    id: 6, 
-    action: 'Updated', 
-    entity: 'Employee', 
-    entityName: 'Lana Steiner', 
-    user: 'Sarah Ahmed', 
-    userEmail: 'sarah.ahmed@company.com',
-    timestamp: '2024-01-14 11:30:55',
-    details: 'Updated employee status to: Active'
-  },
-  { 
-    id: 7, 
-    action: 'Created', 
-    entity: 'Department', 
-    entityName: 'Marketing', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-13 15:45:20',
-    details: 'Created new department with head: Ali Maged'
-  },
-  { 
-    id: 8, 
-    action: 'Deleted', 
-    entity: 'Document', 
-    entityName: 'Certificate - Noah Brown', 
-    user: 'Sarah Ahmed', 
-    userEmail: 'sarah.ahmed@company.com',
-    timestamp: '2024-01-13 10:20:40',
-    details: 'Deleted expired document'
-  },
-  { 
-    id: 9, 
-    action: 'Updated', 
-    entity: 'Advance', 
-    entityName: 'Advance Request - Isabella Davis', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-12 13:15:30',
-    details: 'Updated advance status to: Approved'
-  },
-  { 
-    id: 10, 
-    action: 'Created', 
-    entity: 'User', 
-    entityName: 'Fatima Ali', 
-    user: 'Mohamed Ali', 
-    userEmail: 'mohamed.ali@company.com',
-    timestamp: '2024-01-12 09:00:12',
-    details: 'Created new user account with role: Employee'
-  },
-  { 
-    id: 11, 
-    action: 'Logged In', 
-    entity: 'System', 
-    entityName: 'Login', 
-    user: 'Ahmed Hassan', 
-    userEmail: 'ahmed.hassan@company.com',
-    timestamp: '2024-01-15 08:00:00',
-    details: 'User logged into the system'
-  },
-  { 
-    id: 12, 
-    action: 'Logged Out', 
-    entity: 'System', 
-    entityName: 'Logout', 
-    user: 'Fatima Ali', 
-    userEmail: 'fatima.ali@company.com',
-    timestamp: '2024-01-14 17:30:00',
-    details: 'User logged out of the system'
-  },
-];
+import { mockActivityLogs, ActivityLog as ActivityLogType } from '../../data/mock';
 
 const ActivityLog = () => {
-  const [filteredLogs, setFilteredLogs] = useState(activityLogs);
+  const [activityLogs] = useState<ActivityLogType[]>(mockActivityLogs);
+  const [filteredLogs, setFilteredLogs] = useState(mockActivityLogs);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('All');
   const [entityFilter, setEntityFilter] = useState('All');

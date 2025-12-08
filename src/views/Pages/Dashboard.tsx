@@ -1,44 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import MetricCard from '../../components/MetricCard';
 import DepartmentChart from '../../components/DepartmentChart';
 import RecentActivities from '../../components/RecentActivities';
 import EmployeesTable from '../../components/EmployeesTable';
 import { Users, UserCheck, Calendar, DollarSign } from 'lucide-react';
-import { dashboardAPI } from '../../services/api';
+import { mockDashboardStats } from '../../data/mock';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    total_employees: 0,
-    active_employees: 0,
-    present_today: 0,
-    pending_leaves: 0,
-    monthly_payroll: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await dashboardAPI.getStats();
-        if (response.success && response.data) {
-          setStats({
-            total_employees: response.data.total_employees || 0,
-            active_employees: response.data.active_employees || 0,
-            present_today: response.data.present_today || 0,
-            pending_leaves: response.data.pending_leaves || 0,
-            monthly_payroll: response.data.monthly_payroll || 0,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
+  const [stats] = useState(mockDashboardStats);
+  const [isLoading] = useState(false);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

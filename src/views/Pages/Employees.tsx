@@ -17,152 +17,86 @@ import {
   ChevronRight
 } from 'lucide-react';
 import AddEmployeeModal from '../../components/AddEmployeeModal';
-import { employeesAPI, departmentsAPI } from '../../services/api';
-
-interface Employee {
-  id: number;
-  name: string;
-  role: string;
-  department_name?: string;
-  department?: string;
-  email: string;
-  status: 'Active' | 'On Leave' | 'Inactive';
-}
+import { mockEmployees, mockDepartments, Employee } from '../../data/mock';
 
 const Employees = () => {
+  const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalEmployees, setTotalEmployees] = useState(0);
-  const [activeEmployees, setActiveEmployees] = useState(0);
-  const [onLeaveEmployees, setOnLeaveEmployees] = useState(0);
-  const [inactiveEmployees, setInactiveEmployees] = useState(0);
+  const [totalEmployees, setTotalEmployees] = useState(mockEmployees.length);
+  const [activeEmployees, setActiveEmployees] = useState(mockEmployees.filter(e => e.status === 'Active').length);
+  const [onLeaveEmployees, setOnLeaveEmployees] = useState(mockEmployees.filter(e => e.status === 'On Leave').length);
+  const [inactiveEmployees, setInactiveEmployees] = useState(mockEmployees.filter(e => e.status === 'Inactive').length);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [departments, setDepartments] = useState<{id: number; name: string}[]>([]);
+  const [departments] = useState(mockDepartments);
   const itemsPerPage = 10;
 
-  // Fetch employees from API
-  const fetchEmployees = async () => {
-    try {
-      setIsLoading(true);
-      const response = await employeesAPI.getAll({
-        page: currentPage,
-        per_page: itemsPerPage,
-        search: searchTerm || undefined,
-        department: selectedDepartment || undefined,
-        status: selectedStatus || undefined,
-      });
-
-      if (response.success) {
-        // Map API response to match component interface
-        const mappedEmployees = response.data.map((emp: any) => ({
-          ...emp,
-          department: emp.department_name || emp.department || 'N/A',
-        }));
-        setEmployees(mappedEmployees);
-        
-        if (response.pagination) {
-          setTotalPages(response.pagination.total_pages);
-          setTotalEmployees(response.pagination.total);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch departments for filter dropdown
-  const fetchDepartments = async () => {
-    try {
-      const response = await departmentsAPI.getAll();
-      if (response.success) {
-        setDepartments(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
-
-  // Fetch statistics
-  const fetchStatistics = async () => {
-    try {
-      // You can create a separate stats endpoint or calculate from employees
-      // For now, we'll fetch all employees to calculate stats
-      const response = await employeesAPI.getAll({ per_page: 1000 });
-      if (response.success) {
-        const allEmployees = response.data;
-        setTotalEmployees(allEmployees.length);
-        setActiveEmployees(allEmployees.filter((e: Employee) => e.status === 'Active').length);
-        setOnLeaveEmployees(allEmployees.filter((e: Employee) => e.status === 'On Leave').length);
-        setInactiveEmployees(allEmployees.filter((e: Employee) => e.status === 'Inactive').length);
-      }
-    } catch (error) {
-      console.error('Error fetching statistics:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchEmployees();
-  }, [currentPage, searchTerm, selectedDepartment, selectedStatus]);
+    // Filter employees based on search term, department, and status
+    let filtered = allEmployees;
 
-  useEffect(() => {
-    fetchDepartments();
-    fetchStatistics();
-  }, []);
-
-  const handleAddEmployee = async (employeeData: any) => {
-    try {
-      // Map form data to API format
-      const apiData = {
-        name: employeeData.fullName || employeeData.name,
-        email: employeeData.email,
-        role: employeeData.role,
-        department: employeeData.department, // API will handle department lookup
-        phone_country: employeeData.phoneCountry,
-        phone_number: employeeData.phoneNumber,
-        address: employeeData.address,
-        emergency_contact: employeeData.emergencyContact,
-        salary: employeeData.salary,
-        salary_currency: employeeData.salaryCurrency,
-        branch: employeeData.branch,
-        join_date: employeeData.joinDate,
-        status: employeeData.status || 'Active',
-      };
-
-      const response = await employeesAPI.create(apiData);
-      if (response.success) {
-        // Refresh the list
-        fetchEmployees();
-        fetchStatistics();
-        setIsModalOpen(false);
-      }
-    } catch (error) {
-      console.error('Error adding employee:', error);
-      alert('Failed to add employee. Please try again.');
+    if (searchTerm) {
+      filtered = filtered.filter(emp =>
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.role.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
+
+    if (selectedDepartment) {
+      filtered = filtered.filter(emp => emp.department === selectedDepartment);
+    }
+
+    if (selectedStatus) {
+      filtered = filtered.filter(emp => emp.status === selectedStatus);
+    }
+
+    // Update statistics
+    setTotalEmployees(allEmployees.length);
+    setActiveEmployees(allEmployees.filter(e => e.status === 'Active').length);
+    setOnLeaveEmployees(allEmployees.filter(e => e.status === 'On Leave').length);
+    setInactiveEmployees(allEmployees.filter(e => e.status === 'Inactive').length);
+
+    // Pagination
+    const totalPagesCalc = Math.ceil(filtered.length / itemsPerPage);
+    setTotalPages(totalPagesCalc);
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setEmployees(filtered.slice(startIndex, endIndex));
+  }, [searchTerm, selectedDepartment, selectedStatus, currentPage, allEmployees]);
+
+  const handleAddEmployee = (employeeData: any) => {
+    const newEmployee: Employee = {
+      id: allEmployees.length + 1,
+      name: employeeData.fullName || employeeData.name,
+      email: employeeData.email,
+      role: employeeData.role,
+      department: employeeData.department,
+      phone_country: employeeData.phoneCountry,
+      phone_number: employeeData.phoneNumber,
+      address: employeeData.address,
+      emergency_contact: employeeData.emergencyContact,
+      salary: employeeData.salary,
+      salary_currency: employeeData.salaryCurrency,
+      branch: employeeData.branch,
+      join_date: employeeData.joinDate,
+      status: employeeData.status || 'Active',
+    };
+    setAllEmployees([...allEmployees, newEmployee]);
+    setIsModalOpen(false);
   };
 
-  const handleDeleteEmployee = async (id: number) => {
+  const handleDeleteEmployee = (id: number) => {
     if (!confirm('Are you sure you want to delete this employee?')) {
       return;
     }
-
-    try {
-      const response = await employeesAPI.delete(id);
-      if (response.success) {
-        fetchEmployees();
-        fetchStatistics();
-      }
-    } catch (error) {
-      console.error('Error deleting employee:', error);
-      alert('Failed to delete employee. Please try again.');
-    }
+    setAllEmployees(allEmployees.filter(emp => emp.id !== id));
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

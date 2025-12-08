@@ -10,116 +10,67 @@ import {
 import AddDepartmentModal from '../../components/AddDepartmentModal';
 import EditDepartmentModal from '../../components/EditDepartmentModal';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
-import { departmentsAPI, employeesAPI } from '../../services/api';
-
-interface Department {
-  id: number;
-  name: string;
-  head_of_department?: string;
-  headOfDepartment?: string;
-  description: string;
-  employee_count?: number;
-  employeeCount?: number;
-  employees?: string[];
-}
+import { mockDepartments, Department } from '../../data/mock';
 
 const Departments = () => {
-  const [departmentsList, setDepartmentsList] = useState<Department[]>([]);
+  const [departmentsList, setDepartmentsList] = useState<Department[]>(mockDepartments);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchDepartments = async () => {
-    try {
-      setIsLoading(true);
-      const response = await departmentsAPI.getAll({ search: searchTerm || undefined });
-      if (response.success) {
-        // Map API response to match component interface
-        const mappedDepartments = await Promise.all(
-          response.data.map(async (dept: any) => {
-            // Get employee initials for this department
-            const empResponse = await employeesAPI.getAll({ department: dept.name, per_page: 3 });
-            const employees = empResponse.success ? empResponse.data : [];
-            const initials = employees.map((emp: any) => {
-              const names = emp.name.split(' ');
-              return (names[0]?.[0] || '') + (names[1]?.[0] || '');
-            });
-
-            return {
-              ...dept,
-              headOfDepartment: dept.head_of_department || dept.headOfDepartment || '',
-              employeeCount: dept.employee_count || dept.employeeCount || 0,
-              employees: initials,
-            };
-          })
-        );
-        setDepartmentsList(mappedDepartments);
-      }
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDepartments();
+    // Filter departments based on search term
+    if (searchTerm) {
+      const filtered = mockDepartments.filter(dept =>
+        dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.headOfDepartment?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setDepartmentsList(filtered);
+    } else {
+      setDepartmentsList(mockDepartments);
+    }
   }, [searchTerm]);
 
-  const handleAddDepartment = async (data: any) => {
-    try {
-      const response = await departmentsAPI.create({
-        departmentName: data.departmentName,
-        headOfDepartment: data.headOfDepartment,
-        description: data.description,
-      });
-      if (response.success) {
-        fetchDepartments();
-        setIsAddModalOpen(false);
-      }
-    } catch (error) {
-      console.error('Error adding department:', error);
-      alert('Failed to add department. Please try again.');
-    }
+  const handleAddDepartment = (data: any) => {
+    const newDepartment: Department = {
+      id: departmentsList.length + 1,
+      name: data.departmentName,
+      headOfDepartment: data.headOfDepartment,
+      description: data.description,
+      employeeCount: 0,
+      employees: [],
+    };
+    setDepartmentsList([...departmentsList, newDepartment]);
+    setIsAddModalOpen(false);
   };
 
-  const handleEditDepartment = async (data: any) => {
+  const handleEditDepartment = (data: any) => {
     if (!selectedDepartment) return;
     
-    try {
-      const response = await departmentsAPI.update(selectedDepartment.id, {
-        departmentName: data.departmentName,
-        headOfDepartment: data.headOfDepartment,
-        description: data.description,
-      });
-      if (response.success) {
-        fetchDepartments();
-        setIsEditModalOpen(false);
-        setSelectedDepartment(null);
-      }
-    } catch (error) {
-      console.error('Error updating department:', error);
-      alert('Failed to update department. Please try again.');
-    }
+    setDepartmentsList(departmentsList.map(dept =>
+      dept.id === selectedDepartment.id
+        ? {
+            ...dept,
+            name: data.departmentName,
+            headOfDepartment: data.headOfDepartment,
+            description: data.description,
+          }
+        : dept
+    ));
+    setIsEditModalOpen(false);
+    setSelectedDepartment(null);
   };
 
-  const handleDeleteDepartment = async () => {
+  const handleDeleteDepartment = () => {
     if (!selectedDepartment) return;
     
-    try {
-      const response = await departmentsAPI.delete(selectedDepartment.id);
-      if (response.success) {
-        fetchDepartments();
-        setIsDeleteModalOpen(false);
-        setSelectedDepartment(null);
-      }
-    } catch (error: any) {
-      console.error('Error deleting department:', error);
-      alert(error.message || 'Failed to delete department. Please try again.');
-    }
+    setDepartmentsList(departmentsList.filter(dept => dept.id !== selectedDepartment.id));
+    setIsDeleteModalOpen(false);
+    setSelectedDepartment(null);
   };
 
   const openEditModal = (department: Department) => {
@@ -244,7 +195,12 @@ const Departments = () => {
           setSelectedDepartment(null);
         }}
         onSubmit={handleEditDepartment}
-        department={selectedDepartment}
+        department={selectedDepartment ? {
+          id: selectedDepartment.id,
+          name: selectedDepartment.name,
+          headOfDepartment: selectedDepartment.headOfDepartment || selectedDepartment.head_of_department || '',
+          description: selectedDepartment.description,
+        } : null}
       />
 
       {/* Delete Confirmation Modal */}

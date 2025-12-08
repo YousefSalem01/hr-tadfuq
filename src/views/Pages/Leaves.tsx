@@ -14,41 +14,24 @@ import {
   TrendingDown
 } from 'lucide-react';
 import LeaveRequestModal from '../../components/LeaveRequestModal';
-
-interface Leave {
-  id: number;
-  employeeName: string;
-  leaveType: string;
-  startDate: string;
-  endDate: string;
-  days: number;
-  status: 'Approved' | 'pending' | 'Rejected' | 'Active';
-}
-
-const leaves: Leave[] = [
-  { id: 1, employeeName: 'Olivia Rhye', leaveType: 'Sick', startDate: 'Nov 1, 2025', endDate: 'Dec 5, 2025', days: 4, status: 'Approved' },
-  { id: 2, employeeName: 'Phoenix Baker', leaveType: 'Casual', startDate: 'Nov 1, 2025', endDate: 'Dec 5, 2025', days: 5, status: 'pending' },
-  { id: 3, employeeName: 'Lana Steiner', leaveType: 'Maternity', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 8, status: 'Approved' },
-  { id: 4, employeeName: 'Demi Wilkinson', leaveType: 'Paternity', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 7, status: 'Rejected' },
-  { id: 5, employeeName: 'Candice Wu', leaveType: 'Bereavement', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 1, status: 'Approved' },
-  { id: 6, employeeName: 'Natali Craig', leaveType: 'Vacation', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 2, status: 'Approved' },
-  { id: 7, employeeName: 'Drew Cano', leaveType: 'Personal', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 4, status: 'Approved' },
-  { id: 8, employeeName: 'Orlando Diggs', leaveType: 'Unpaid', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
-  { id: 9, employeeName: 'Andi Lane', leaveType: 'Compassionate', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
-  { id: 10, employeeName: 'Kate Morrison', leaveType: 'Jury Duty', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 7, status: 'Active' },
-  { id: 11, employeeName: 'Jasper Lee', leaveType: 'Study Leave', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
-  { id: 12, employeeName: 'Sienna Faye', leaveType: 'Sabbatical', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
-  { id: 13, employeeName: 'Gideon Parks', leaveType: 'Public Holiday', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 6, status: 'Approved' },
-  { id: 14, employeeName: 'Zara Ellis', leaveType: 'Family Leave', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 4, status: 'Approved' },
-];
+import { mockLeaves, Leave } from '../../data/mock';
 
 const Leaves = () => {
+  const [leaves, setLeaves] = useState<Leave[]>(mockLeaves);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmitLeaveRequest = (data: any) => {
-    // Handle leave request submission
-    console.log('Leave request data:', data);
-    // You can add the leave request to the list here
+    const newLeave: Leave = {
+      id: leaves.length + 1,
+      employeeName: data.employeeName,
+      leaveType: data.leaveType,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      days: data.days,
+      status: 'pending',
+    };
+    setLeaves([...leaves, newLeave]);
+    setIsModalOpen(false);
   };
 
   const getInitials = (name: string) => {
