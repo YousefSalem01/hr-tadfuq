@@ -11,7 +11,7 @@ import {
   Clock,
   User
 } from 'lucide-react';
-import { mockActivityLogs, ActivityLog as ActivityLogType } from '../../data/mock';
+import { mockActivityLogs, ActivityLog as ActivityLogType } from '../data/mock';
 
 const ActivityLog = () => {
   const [activityLogs] = useState<ActivityLogType[]>(mockActivityLogs);

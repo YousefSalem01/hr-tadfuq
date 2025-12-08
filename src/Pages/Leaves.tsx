@@ -13,8 +13,8 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react';
-import LeaveRequestModal from '../../components/LeaveRequestModal';
-import { mockLeaves, Leave } from '../../data/mock';
+import LeaveRequestModal from '../uikit/LeaveRequestModal';
+import { mockLeaves, Leave } from '../data/mock';
 
 const Leaves = () => {
   const [leaves, setLeaves] = useState<Leave[]>(mockLeaves);

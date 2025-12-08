@@ -7,10 +7,10 @@ import {
   Edit,
   Users
 } from 'lucide-react';
-import AddDepartmentModal from '../../components/AddDepartmentModal';
-import EditDepartmentModal from '../../components/EditDepartmentModal';
-import DeleteConfirmModal from '../../components/DeleteConfirmModal';
-import { mockDepartments, Department } from '../../data/mock';
+import AddDepartmentModal from '../uikit/AddDepartmentModal';
+import EditDepartmentModal from '../uikit/EditDepartmentModal';
+import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
+import { mockDepartments, Department } from '../data/mock';
 
 const Departments = () => {
   const [departmentsList, setDepartmentsList] = useState<Department[]>(mockDepartments);

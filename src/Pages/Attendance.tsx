@@ -13,7 +13,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { mockAttendanceChartData, mockAttendanceStats } from '../../data/mock';
+import { mockAttendanceChartData, mockAttendanceStats } from '../data/mock';
 
 const Attendance = () => {
   const [selectedDate] = useState('Today');

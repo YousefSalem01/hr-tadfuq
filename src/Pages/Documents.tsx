@@ -4,36 +4,35 @@ import {
   Search, 
   Filter, 
   ChevronDown, 
-  FileMinus,
-  DollarSign,
-  FileUp,
-  FileDown,
+  Files,
+  FileText,
+  AlertCircle,
+  FileX,
   Plus,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import AddAdvanceModal from '../../components/AddAdvanceModal';
-import { mockAdvanceRecords, AdvanceRecord } from '../../data/mock';
+import AddDocumentsModal from '../uikit/AddDocumentsModal';
+import { mockDocuments, DocumentRecord } from '../data/mock';
 
-const Advance = () => {
-  const [advanceRecords, setAdvanceRecords] = useState<AdvanceRecord[]>(mockAdvanceRecords);
+const Documents = () => {
+  const [documentRecords, setDocumentRecords] = useState<DocumentRecord[]>(mockDocuments);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(advanceRecords.length / itemsPerPage);
+  const totalPages = Math.ceil(documentRecords.length / itemsPerPage);
 
-  const handleAddAdvance = (data: any) => {
-    const newAdvance: AdvanceRecord = {
-      id: advanceRecords.length + 1,
+  const handleAddDocument = (data: any) => {
+    const newDocument: DocumentRecord = {
+      id: documentRecords.length + 1,
       employeeName: data.employeeName,
-      amount: data.amount,
-      monthlyDeduction: data.monthlyDeduction,
-      remaining: data.amount,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      documentType: data.documentType,
+      issuer: data.issuer,
+      issueDate: data.issueDate,
+      expiryDate: data.expiryDate,
       status: 'Pending',
     };
-    setAdvanceRecords([...advanceRecords, newAdvance]);
+    setDocumentRecords([...documentRecords, newDocument]);
     setIsModalOpen(false);
   };
 
@@ -54,6 +53,8 @@ const Advance = () => {
         return 'bg-orange-500';
       case 'Hold':
         return 'bg-gray-500';
+      case 'Expired':
+        return 'bg-red-500';
       default:
         return 'bg-gray-500';
     }
@@ -67,30 +68,23 @@ const Advance = () => {
         return 'text-orange-700';
       case 'Hold':
         return 'text-gray-700';
+      case 'Expired':
+        return 'text-red-700';
       default:
         return 'text-gray-700';
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentRecords = advanceRecords.slice(startIndex, endIndex);
+  const currentRecords = documentRecords.slice(startIndex, endIndex);
 
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Advance</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
           <p className="text-sm text-gray-500 mt-1">Streamline employee salary advances and payments</p>
         </div>
         <button 
@@ -98,61 +92,61 @@ const Advance = () => {
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
         >
           <Plus size={16} />
-          Add Advance
+          Add Documents
         </button>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Total Advances */}
+        {/* Total Documents */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-red-50 rounded-lg">
-              <FileMinus className="text-primary" size={24} />
+              <Files className="text-primary" size={24} />
             </div>
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900 mb-1">14</div>
-            <div className="text-sm text-gray-500">Total Advances</div>
+            <div className="text-sm text-gray-500">Total Documents</div>
           </div>
         </div>
 
-        {/* Total Amount */}
+        {/* Valid */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-red-50 rounded-lg">
-              <DollarSign className="text-primary" size={24} />
+              <FileText className="text-primary" size={24} />
             </div>
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900 mb-1">$21,750</div>
-            <div className="text-sm text-gray-500">Total Amount</div>
+            <div className="text-sm text-gray-500">Valid</div>
           </div>
         </div>
 
-        {/* Monthly Deduction */}
+        {/* Expiring Soon */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-red-50 rounded-lg">
-              <FileUp className="text-primary" size={24} />
+              <AlertCircle className="text-primary" size={24} />
             </div>
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900 mb-1">$2,750</div>
-            <div className="text-sm text-gray-500">Monthly Deduction</div>
+            <div className="text-sm text-gray-500">Expiring Soon</div>
           </div>
         </div>
 
-        {/* Completed */}
+        {/* Expired */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-red-50 rounded-lg">
-              <FileDown className="text-primary" size={24} />
+              <FileX className="text-primary" size={24} />
             </div>
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
-            <div className="text-sm text-gray-500">Completed</div>
+            <div className="text-sm text-gray-500">Expired</div>
           </div>
         </div>
       </div>
@@ -172,10 +166,12 @@ const Advance = () => {
             <Filter size={20} className="text-gray-600" />
           </button>
           <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>Completed</option>
-            <option>Active</option>
-            <option>Pending</option>
-            <option>Hold</option>
+            <option>type</option>
+            <option>Certificate</option>
+            <option>License</option>
+            <option>Passport</option>
+            <option>Visa</option>
+            <option>ID Card</option>
           </select>
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
             <Download size={16} />
@@ -184,18 +180,17 @@ const Advance = () => {
         </div>
       </div>
 
-      {/* Advances Table */}
+      {/* Documents Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Employees</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Amount</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Monthly Deduction</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Remaining</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Start Date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">End Date</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Document Type</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Issuer</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Issue Date</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Expiry Date</th>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
                   <div className="flex items-center gap-1">
                     Status
@@ -218,19 +213,16 @@ const Advance = () => {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.amount)}</div>
+                    <div className="text-sm text-gray-700">{record.documentType}</div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.monthlyDeduction)}</div>
+                    <div className="text-sm text-gray-700">{record.issuer}</div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.remaining)}</div>
+                    <div className="text-sm text-gray-700">{record.issueDate}</div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.startDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.endDate}</div>
+                    <div className="text-sm text-gray-700">{record.expiryDate}</div>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
@@ -289,15 +281,15 @@ const Advance = () => {
         </div>
       </div>
 
-      {/* Add Advance Modal */}
-      <AddAdvanceModal
+      {/* Add Documents Modal */}
+      <AddDocumentsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddAdvance}
+        onSubmit={handleAddDocument}
       />
     </div>
   );
 };
 
-export default Advance;
+export default Documents;
 

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import MetricCard from '../../components/MetricCard';
-import DepartmentChart from '../../components/DepartmentChart';
-import RecentActivities from '../../components/RecentActivities';
-import EmployeesTable from '../../components/EmployeesTable';
+import MetricCard from '../uikit/MetricCard';
+import DepartmentChart from '../uikit/DepartmentChart';
+import RecentActivities from '../uikit/RecentActivities';
+import EmployeesTable from '../uikit/EmployeesTable';
 import { Users, UserCheck, Calendar, DollarSign } from 'lucide-react';
-import { mockDashboardStats } from '../../data/mock';
+import { mockDashboardStats } from '../data/mock';
 
 const Dashboard = () => {
   const [stats] = useState(mockDashboardStats);

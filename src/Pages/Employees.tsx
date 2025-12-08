@@ -16,8 +16,8 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import AddEmployeeModal from '../../components/AddEmployeeModal';
-import { mockEmployees, mockDepartments, Employee } from '../../data/mock';
+import AddEmployeeModal from '../uikit/AddEmployeeModal';
+import { mockEmployees, mockDepartments, Employee } from '../data/mock';
 
 const Employees = () => {
   const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);

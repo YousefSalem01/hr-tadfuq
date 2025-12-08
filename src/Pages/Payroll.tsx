@@ -12,8 +12,8 @@ import {
   ChevronRight,
   Plus
 } from 'lucide-react';
-import CreatePayrollModal from '../../components/CreatePayrollModal';
-import { mockPayrollRecords, mockEmployees, PayrollRecord } from '../../data/mock';
+import CreatePayrollModal from '../uikit/CreatePayrollModal';
+import { mockPayrollRecords, mockEmployees, PayrollRecord } from '../data/mock';
 
 const Payroll = () => {
   const [allPayrollRecords, setAllPayrollRecords] = useState<PayrollRecord[]>(mockPayrollRecords);

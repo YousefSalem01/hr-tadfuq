@@ -10,12 +10,12 @@ import {
   Key,
   UserCheck
 } from 'lucide-react';
-import AddUserModal from '../../components/AddUserModal';
-import EditUserModal from '../../components/EditUserModal';
-import DeleteConfirmModal from '../../components/DeleteConfirmModal';
-import PermissionModal from '../../components/PermissionModal';
-import AddRoleModal from '../../components/AddRoleModal';
-import { mockUsers, mockRoles, User, Role } from '../../data/mock';
+import AddUserModal from '../uikit/AddUserModal';
+import EditUserModal from '../uikit/EditUserModal';
+import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
+import PermissionModal from '../uikit/PermissionModal';
+import AddRoleModal from '../uikit/AddRoleModal';
+import { mockUsers, mockRoles, User, Role } from '../data/mock';
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
