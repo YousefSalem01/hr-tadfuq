@@ -75,7 +75,7 @@ const PermissionModal = ({ isOpen, onClose, onSave, user, roles }: PermissionMod
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Role Default Permissions:</h3>
             <div className="flex flex-wrap gap-2">
-              {rolePermissions.map((perm, index) => (
+              {rolePermissions.map((perm: string, index: number) => (
                 <span
                   key={index}
                   className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"

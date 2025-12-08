@@ -1,4 +1,4 @@
-import { Trash2, Edit, User, HelpCircle } from 'lucide-react';
+import { Trash2, Edit, HelpCircle } from 'lucide-react';
 
 interface Employee {
   id: number;
