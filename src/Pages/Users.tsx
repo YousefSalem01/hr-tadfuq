@@ -15,6 +15,7 @@ import EditUserModal from '../uikit/EditUserModal';
 import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
 import PermissionModal from '../uikit/PermissionModal';
 import AddRoleModal from '../uikit/AddRoleModal';
+import HrButton from '../uikit/HrButton/HrButton';
 import { mockUsers, mockRoles, User, Role } from '../data/mock';
 
 const Users = () => {
@@ -129,22 +130,22 @@ const Users = () => {
           <p className="text-sm text-gray-500 mt-1">Manage user accounts, roles, and permissions</p>
         </div>
         {activeTab === 'users' && (
-          <button 
+          <HrButton 
+            variant="primary"
+            icon={Plus}
             onClick={() => setIsAddUserModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
           >
-            <Plus size={16} />
             Add User
-          </button>
+          </HrButton>
         )}
         {activeTab === 'roles' && (
-          <button 
+          <HrButton 
+            variant="primary"
+            icon={Plus}
             onClick={() => setIsAddRoleModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
           >
-            <Plus size={16} />
             Create Role
-          </button>
+          </HrButton>
         )}
       </div>
 
@@ -194,9 +195,7 @@ const Users = () => {
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
-              <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <Filter size={20} className="text-gray-600" />
-              </button>
+              <HrButton variant="icon" icon={Filter} />
             </div>
           </div>
 
@@ -253,25 +252,24 @@ const Users = () => {
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center justify-end gap-2">
-                          <button
+                          <HrButton
+                            variant="icon"
+                            icon={Key}
                             onClick={() => openPermissionModal(user)}
-                            className="p-2 hover:bg-blue-50 rounded-lg text-gray-600 hover:text-blue-600"
                             title="Manage Permissions"
-                          >
-                            <Key size={16} />
-                          </button>
-                          <button
+                            className="hover:bg-blue-50 hover:text-blue-600"
+                          />
+                          <HrButton
+                            variant="icon"
+                            icon={Edit}
                             onClick={() => openEditModal(user)}
-                            className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
+                          />
+                          <HrButton
+                            variant="danger"
+                            icon={Trash2}
                             onClick={() => openDeleteModal(user)}
-                            className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                            className="p-2"
+                          />
                         </div>
                       </td>
                     </tr>

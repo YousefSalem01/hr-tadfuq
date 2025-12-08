@@ -13,6 +13,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import AddDocumentsModal from '../uikit/AddDocumentsModal';
+import HrButton from '../uikit/HrButton/HrButton';
 import { mockDocuments, DocumentRecord } from '../data/mock';
 
 const Documents = () => {
@@ -87,13 +88,13 @@ const Documents = () => {
           <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
           <p className="text-sm text-gray-500 mt-1">Streamline employee salary advances and payments</p>
         </div>
-        <button 
+        <HrButton 
+          variant="primary"
+          icon={Plus}
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
         >
-          <Plus size={16} />
           Add Documents
-        </button>
+        </HrButton>
       </div>
 
       {/* Statistics Cards */}
@@ -162,9 +163,7 @@ const Documents = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-            <Filter size={20} className="text-gray-600" />
-          </button>
+          <HrButton variant="icon" icon={Filter} />
           <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
             <option>type</option>
             <option>Certificate</option>
@@ -173,10 +172,9 @@ const Documents = () => {
             <option>Visa</option>
             <option>ID Card</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <Download size={16} />
+          <HrButton variant="secondary" icon={Download}>
             Export Report
-          </button>
+          </HrButton>
         </div>
       </div>
 
@@ -240,29 +238,25 @@ const Documents = () => {
 
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <button
+          <HrButton
+            variant="secondary"
+            icon={ChevronLeft}
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <ChevronLeft size={16} />
             Previous
-          </button>
+          </HrButton>
           <div className="flex items-center gap-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
               if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
                 return (
-                  <button
+                  <HrButton
                     key={page}
+                    variant={currentPage === page ? 'primary' : 'ghost'}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                      currentPage === page
-                        ? 'bg-primary text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
                   >
                     {page}
-                  </button>
+                  </HrButton>
                 );
               } else if (page === currentPage - 2 || page === currentPage + 2) {
                 return <span key={page} className="text-gray-500">...</span>;
@@ -270,14 +264,15 @@ const Documents = () => {
               return null;
             })}
           </div>
-          <button
+          <HrButton
+            variant="secondary"
+            icon={ChevronRight}
+            iconPosition="right"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             Next
-            <ChevronRight size={16} />
-          </button>
+          </HrButton>
         </div>
       </div>
 

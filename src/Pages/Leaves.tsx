@@ -14,6 +14,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import LeaveRequestModal from '../uikit/LeaveRequestModal';
+import HrButton from '../uikit/HrButton/HrButton';
 import { mockLeaves, Leave } from '../data/mock';
 
 const Leaves = () => {
@@ -83,13 +84,13 @@ const Leaves = () => {
           <h1 className="text-2xl font-bold text-gray-900">Leaves managements</h1>
           <p className="text-sm text-gray-500 mt-1">Manage employee time off with ease.</p>
         </div>
-        <button 
+        <HrButton 
+          variant="primary"
+          icon={Plus}
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
         >
-          <Plus size={16} />
           New Request
-        </button>
+        </HrButton>
       </div>
 
       {/* Statistics Cards */}
@@ -178,9 +179,7 @@ const Leaves = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-            <Filter size={20} className="text-gray-600" />
-          </button>
+          <HrButton variant="icon" icon={Filter} />
           <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
             <option>All leave types</option>
             <option>Sick</option>
@@ -256,12 +255,8 @@ const Leaves = () => {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900">
-                        <Edit size={16} />
-                      </button>
-                      <button className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600">
-                        <Trash2 size={16} />
-                      </button>
+                      <HrButton variant="icon" icon={Edit} />
+                      <HrButton variant="danger" icon={Trash2} className="p-2" />
                     </div>
                   </td>
                 </tr>

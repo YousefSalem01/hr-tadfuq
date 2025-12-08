@@ -1,5 +1,6 @@
 import { X, Check } from 'lucide-react';
 import { useState } from 'react';
+import HrButton from './HrButton/HrButton';
 
 interface AddRoleModalProps {
   isOpen: boolean;
@@ -163,19 +164,19 @@ const AddRoleModal = ({ isOpen, onClose, onSubmit }: AddRoleModalProps) => {
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-            <button
+            <HrButton
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </HrButton>
+            <HrButton
               type="submit"
-              className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
+              variant="primary"
             >
               Create Role
-            </button>
+            </HrButton>
           </div>
         </form>
       </div>

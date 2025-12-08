@@ -1,5 +1,6 @@
 import { X, Calendar, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import HrButton from './HrButton/HrButton';
 
 interface AddEmployeeModalProps {
   isOpen: boolean;
@@ -273,19 +274,19 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
-            <button
+            <HrButton
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </HrButton>
+            <HrButton
               type="submit"
-              className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
+              variant="primary"
             >
               Add Employee
-            </button>
+            </HrButton>
           </div>
         </form>
       </div>

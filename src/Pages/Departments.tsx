@@ -10,6 +10,7 @@ import {
 import AddDepartmentModal from '../uikit/AddDepartmentModal';
 import EditDepartmentModal from '../uikit/EditDepartmentModal';
 import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
+import HrButton from '../uikit/HrButton/HrButton';
 import { mockDepartments, Department } from '../data/mock';
 
 const Departments = () => {
@@ -91,13 +92,13 @@ const Departments = () => {
           <h1 className="text-2xl font-bold text-gray-900">Departments</h1>
           <p className="text-sm text-gray-500 mt-1">Manage company departments and structure</p>
         </div>
-        <button 
+        <HrButton 
+          variant="primary"
+          icon={Plus}
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
         >
-          <Plus size={16} />
           Add Department
-        </button>
+        </HrButton>
       </div>
 
       {/* Search and Filter */}
@@ -113,9 +114,7 @@ const Departments = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-            <Filter size={20} className="text-gray-600" />
-          </button>
+          <HrButton variant="icon" icon={Filter} />
         </div>
       </div>
 
@@ -132,18 +131,17 @@ const Departments = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900">{department.name}</h3>
               <div className="flex items-center gap-2">
-                <button 
+                <HrButton 
+                  variant="icon"
+                  icon={Edit}
                   onClick={() => openEditModal(department)}
-                  className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900"
-                >
-                  <Edit size={16} />
-                </button>
-                <button 
+                />
+                <HrButton 
+                  variant="danger"
+                  icon={Trash2}
                   onClick={() => openDeleteModal(department)}
-                  className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600"
-                >
-                  <Trash2 size={16} />
-                </button>
+                  className="p-2"
+                />
               </div>
             </div>
 

@@ -11,6 +11,7 @@ import {
   Clock,
   User
 } from 'lucide-react';
+import HrButton from '../uikit/HrButton/HrButton';
 import { mockActivityLogs, ActivityLog as ActivityLogType } from '../data/mock';
 
 const ActivityLog = () => {
@@ -152,9 +153,7 @@ const ActivityLog = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-            <Filter size={20} className="text-gray-600" />
-          </button>
+          <HrButton variant="icon" icon={Filter} />
           <select 
             value={actionFilter}
             onChange={(e) => handleActionFilter(e.target.value)}

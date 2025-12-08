@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react';
+import HrButton from './HrButton/HrButton';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -37,23 +38,24 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, itemName }: DeleteConf
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4">
-            <button
+            <HrButton
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </HrButton>
+            <HrButton
               type="button"
+              variant="primary"
               onClick={() => {
                 onConfirm();
                 onClose();
               }}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+              className="bg-red-600 hover:bg-red-700"
             >
               Delete
-            </button>
+            </HrButton>
           </div>
         </div>
       </div>
