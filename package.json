@@ -10,11 +10,15 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query-devtools": "^5.91.1",
+    "axios": "^1.13.2",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
     "recharts": "^2.10.3",
-    "lucide-react": "^0.294.0"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -32,4 +36,3 @@
     "vite": "^5.0.8"
   }
 }
-
