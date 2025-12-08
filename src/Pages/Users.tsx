@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import AddUserModal from '../uikit/AddUserModal';
 import EditUserModal from '../uikit/EditUserModal';
-import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
+import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import PermissionModal from '../uikit/PermissionModal';
 import AddRoleModal from '../uikit/AddRoleModal';
 import HrButton from '../uikit/HrButton/HrButton';
@@ -334,14 +334,18 @@ const Users = () => {
         roles={roles}
       />
 
-      <DeleteConfirmModal
+      <HrConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setSelectedUser(null);
         }}
         onConfirm={handleDeleteUser}
-        itemName={selectedUser?.name || ''}
+        title="Delete User"
+        message="Are you sure you want to delete"
+        itemName={selectedUser?.name}
+        confirmText="Delete"
+        type="danger"
       />
 
       <PermissionModal

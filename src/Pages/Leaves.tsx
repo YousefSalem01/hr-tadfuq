@@ -14,11 +14,14 @@ import {
 import LeaveRequestModal from '../uikit/LeaveRequestModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
+import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import { mockLeaves, Leave } from '../data/mock';
 
 const Leaves = () => {
   const [leaves, setLeaves] = useState<Leave[]>(mockLeaves);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null);
 
   const handleSubmitLeaveRequest = (data: any) => {
     const newLeave: Leave = {
@@ -32,6 +35,19 @@ const Leaves = () => {
     };
     setLeaves([...leaves, newLeave]);
     setIsModalOpen(false);
+  };
+
+  const handleDeleteClick = (leave: Leave) => {
+    setSelectedLeave(leave);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedLeave) {
+      setLeaves(leaves.filter(l => l.id !== selectedLeave.id));
+      setIsDeleteModalOpen(false);
+      setSelectedLeave(null);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -220,7 +236,7 @@ const Leaves = () => {
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-end gap-2">
                       <HrButton variant="icon" icon={Edit} />
-                      <HrButton variant="danger" icon={Trash2} className="p-2" />
+                      <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteClick(leave)} className="p-2" />
                     </div>
                   </td>
                 </tr>
@@ -235,6 +251,21 @@ const Leaves = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmitLeaveRequest}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <HrConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedLeave(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Leave Request"
+        message="Are you sure you want to delete this leave request for"
+        itemName={selectedLeave?.employeeName}
+        confirmText="Delete"
+        type="danger"
       />
     </div>
   );

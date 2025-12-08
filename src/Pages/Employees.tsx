@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import AddEmployeeModal from '../uikit/AddEmployeeModal';
 import HrButton from '../uikit/HrButton/HrButton';
+import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import { mockEmployees, mockDepartments, Employee } from '../data/mock';
 
 const Employees = () => {
@@ -30,6 +31,8 @@ const Employees = () => {
   const [onLeaveEmployees, setOnLeaveEmployees] = useState(mockEmployees.filter(e => e.status === 'On Leave').length);
   const [inactiveEmployees, setInactiveEmployees] = useState(mockEmployees.filter(e => e.status === 'Inactive').length);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -93,11 +96,17 @@ const Employees = () => {
     setIsModalOpen(false);
   };
 
-  const handleDeleteEmployee = (id: number) => {
-    if (!confirm('Are you sure you want to delete this employee?')) {
-      return;
+  const handleDeleteClick = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedEmployee) {
+      setAllEmployees(allEmployees.filter(emp => emp.id !== selectedEmployee.id));
+      setIsDeleteModalOpen(false);
+      setSelectedEmployee(null);
     }
-    setAllEmployees(allEmployees.filter(emp => emp.id !== id));
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -332,7 +341,7 @@ const Employees = () => {
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-end gap-2">
                       <HrButton variant="icon" icon={Edit} />
-                      <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteEmployee(employee.id)} className="p-2" />
+                      <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteClick(employee)} className="p-2" />
                     </div>
                   </td>
                 </tr>
@@ -390,6 +399,21 @@ const Employees = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddEmployee}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <HrConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Employee"
+        message="Are you sure you want to delete"
+        itemName={selectedEmployee?.name}
+        confirmText="Delete"
+        type="danger"
       />
     </div>
   );

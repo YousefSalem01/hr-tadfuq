@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import AddDepartmentModal from '../uikit/AddDepartmentModal';
 import EditDepartmentModal from '../uikit/EditDepartmentModal';
-import DeleteConfirmModal from '../uikit/DeleteConfirmModal';
+import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import { mockDepartments, Department } from '../data/mock';
 
@@ -202,14 +202,18 @@ const Departments = () => {
       />
 
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
+      <HrConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setSelectedDepartment(null);
         }}
         onConfirm={handleDeleteDepartment}
-        itemName={selectedDepartment?.name || ''}
+        title="Delete Department"
+        message="Are you sure you want to delete"
+        itemName={selectedDepartment?.name}
+        confirmText="Delete"
+        type="danger"
       />
     </div>
   );

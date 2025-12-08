@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Trash2, Edit, HelpCircle } from 'lucide-react';
+import HrConfirmationModal from './HrConfirmationModal/HrConfirmationModal';
 
 interface Employee {
   id: number;
@@ -18,6 +20,9 @@ const employees: Employee[] = [
 ];
 
 const EmployeesTable = () => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -25,6 +30,18 @@ const EmployeesTable = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleDeleteClick = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedEmployee) {
+      // TODO: Implement delete logic
+      console.log('Deleting employee:', selectedEmployee.name);
+    }
   };
 
   return (
@@ -72,7 +89,10 @@ const EmployeesTable = () => {
                     <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900">
                       <Edit size={16} />
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600">
+                    <button 
+                      onClick={() => handleDeleteClick(employee)}
+                      className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -82,6 +102,20 @@ const EmployeesTable = () => {
           </tbody>
         </table>
       </div>
+
+      <HrConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Employee"
+        message="Are you sure you want to delete"
+        itemName={selectedEmployee?.name}
+        confirmText="Delete"
+        type="danger"
+      />
     </div>
   );
 };
