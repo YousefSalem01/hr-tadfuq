@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import MetricCard from '../uikit/MetricCard';
+import HrCard from '../uikit/HrCard/HrCard';
 import DepartmentChart from '../uikit/DepartmentChart';
 import RecentActivities from '../uikit/RecentActivities';
 import EmployeesTable from '../uikit/EmployeesTable';
@@ -23,29 +23,29 @@ const Dashboard = () => {
     <div className="max-w-7xl mx-auto">
       {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <MetricCard
+        <HrCard
           title="Total Employees"
           value={isLoading ? '...' : stats.total_employees.toString()}
           change={5.2}
-          icon={<Users className="text-gray-700" size={24} />}
+          icon={Users}
         />
-        <MetricCard
+        <HrCard
           title="Present Today"
           value={isLoading ? '...' : stats.present_today.toString()}
           change={2.1}
-          icon={<UserCheck className="text-gray-700" size={24} />}
+          icon={UserCheck}
         />
-        <MetricCard
+        <HrCard
           title="Pending Leaves"
           value={isLoading ? '...' : stats.pending_leaves.toString()}
           change={-12.5}
-          icon={<Calendar className="text-gray-700" size={24} />}
+          icon={Calendar}
         />
-        <MetricCard
+        <HrCard
           title="Monthly Payroll"
           value={isLoading ? '...' : formatCurrency(stats.monthly_payroll)}
           change={8.3}
-          icon={<DollarSign className="text-gray-700" size={24} />}
+          icon={DollarSign}
         />
       </div>
 

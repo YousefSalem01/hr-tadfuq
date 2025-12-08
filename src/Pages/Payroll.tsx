@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import CreatePayrollModal from '../uikit/CreatePayrollModal';
 import HrButton from '../uikit/HrButton/HrButton';
+import HrCard from '../uikit/HrCard/HrCard';
 import { mockPayrollRecords, mockEmployees, PayrollRecord } from '../data/mock';
 
 const Payroll = () => {
@@ -139,57 +140,34 @@ const Payroll = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Total Payroll */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <DollarSign className="text-blue-600" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">$21,750</div>
-            <div className="text-sm text-gray-500">Total Payroll</div>
-          </div>
-        </div>
-
-        {/* Processed */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-50 rounded-lg">
-              <UserCheck className="text-green-600" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">2</div>
-            <div className="text-sm text-gray-500">Processed</div>
-          </div>
-        </div>
-
-        {/* Pending */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-50 rounded-lg">
-              <UserMinus className="text-orange-600" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">1</div>
-            <div className="text-sm text-gray-500">Pending</div>
-          </div>
-        </div>
-
-        {/* Employees */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <Users className="text-red-600" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">4</div>
-            <div className="text-sm text-gray-500">Employees</div>
-          </div>
-        </div>
+        <HrCard
+          title="Total Payroll"
+          value="$21,750"
+          icon={DollarSign}
+          iconBgColor="bg-blue-50"
+          iconColor="text-blue-600"
+        />
+        <HrCard
+          title="Processed"
+          value="2"
+          icon={UserCheck}
+          iconBgColor="bg-green-50"
+          iconColor="text-green-600"
+        />
+        <HrCard
+          title="Pending"
+          value="1"
+          icon={UserMinus}
+          iconBgColor="bg-orange-50"
+          iconColor="text-orange-600"
+        />
+        <HrCard
+          title="Employees"
+          value="4"
+          icon={Users}
+          iconBgColor="bg-red-50"
+          iconColor="text-red-600"
+        />
       </div>
 
       {/* Filters and Search */}

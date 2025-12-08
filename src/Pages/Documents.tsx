@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import AddDocumentsModal from '../uikit/AddDocumentsModal';
 import HrButton from '../uikit/HrButton/HrButton';
+import HrCard from '../uikit/HrCard/HrCard';
 import { mockDocuments, DocumentRecord } from '../data/mock';
 
 const Documents = () => {
@@ -99,57 +100,34 @@ const Documents = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Total Documents */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <Files className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">14</div>
-            <div className="text-sm text-gray-500">Total Documents</div>
-          </div>
-        </div>
-
-        {/* Valid */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <FileText className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">$21,750</div>
-            <div className="text-sm text-gray-500">Valid</div>
-          </div>
-        </div>
-
-        {/* Expiring Soon */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <AlertCircle className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">$2,750</div>
-            <div className="text-sm text-gray-500">Expiring Soon</div>
-          </div>
-        </div>
-
-        {/* Expired */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <FileX className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
-            <div className="text-sm text-gray-500">Expired</div>
-          </div>
-        </div>
+        <HrCard
+          title="Total Documents"
+          value="14"
+          icon={Files}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Valid"
+          value="$21,750"
+          icon={FileText}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Expiring Soon"
+          value="$2,750"
+          icon={AlertCircle}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Expired"
+          value="8"
+          icon={FileX}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
       </div>
 
       {/* Filters and Search */}

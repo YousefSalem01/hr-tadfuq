@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import AddAdvanceModal from '../uikit/AddAdvanceModal';
 import HrButton from '../uikit/HrButton/HrButton';
+import HrCard from '../uikit/HrCard/HrCard';
 import { mockAdvanceRecords, AdvanceRecord } from '../data/mock';
 
 const Advance = () => {
@@ -105,57 +106,34 @@ const Advance = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Total Advances */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <FileMinus className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">14</div>
-            <div className="text-sm text-gray-500">Total Advances</div>
-          </div>
-        </div>
-
-        {/* Total Amount */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <DollarSign className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">$21,750</div>
-            <div className="text-sm text-gray-500">Total Amount</div>
-          </div>
-        </div>
-
-        {/* Monthly Deduction */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <FileUp className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">$2,750</div>
-            <div className="text-sm text-gray-500">Monthly Deduction</div>
-          </div>
-        </div>
-
-        {/* Completed */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <FileDown className="text-primary" size={24} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
-            <div className="text-sm text-gray-500">Completed</div>
-          </div>
-        </div>
+        <HrCard
+          title="Total Advances"
+          value="14"
+          icon={FileMinus}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Total Amount"
+          value="$21,750"
+          icon={DollarSign}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Monthly Deduction"
+          value="$2,750"
+          icon={FileUp}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
+        <HrCard
+          title="Completed"
+          value="8"
+          icon={FileDown}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+        />
       </div>
 
       {/* Filters and Search */}

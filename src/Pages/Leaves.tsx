@@ -9,12 +9,11 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
-  Edit,
-  TrendingUp,
-  TrendingDown
+  Edit
 } from 'lucide-react';
 import LeaveRequestModal from '../uikit/LeaveRequestModal';
 import HrButton from '../uikit/HrButton/HrButton';
+import HrCard from '../uikit/HrCard/HrCard';
 import { mockLeaves, Leave } from '../data/mock';
 
 const Leaves = () => {
@@ -95,77 +94,42 @@ const Leaves = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Total Requests */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <Calendar className="text-primary" size={24} />
-            </div>
-            <div className="flex items-center gap-1 text-green-600">
-              <TrendingUp size={16} />
-              <span className="text-sm font-medium">+5.2%</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">124</div>
-            <div className="text-sm text-gray-500">Total Requests</div>
-            <div className="text-xs text-gray-400 mt-1">from last month</div>
-          </div>
-        </div>
-
-        {/* Pending requests */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <Clock className="text-primary" size={24} />
-            </div>
-            <div className="flex items-center gap-1 text-green-600">
-              <TrendingUp size={16} />
-              <span className="text-sm font-medium">+2.1%</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">118</div>
-            <div className="text-sm text-gray-500">Pending requests</div>
-            <div className="text-xs text-gray-400 mt-1">from last month</div>
-          </div>
-        </div>
-
-        {/* Approved requests */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <CheckCircle className="text-primary" size={24} />
-            </div>
-            <div className="flex items-center gap-1 text-red-600">
-              <TrendingDown size={16} />
-              <span className="text-sm font-medium">-12.5%</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
-            <div className="text-sm text-gray-500">Approved requests</div>
-            <div className="text-xs text-gray-400 mt-1">from last month</div>
-          </div>
-        </div>
-
-        {/* Rejected Requests */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <XCircle className="text-primary" size={24} />
-            </div>
-            <div className="flex items-center gap-1 text-green-600">
-              <TrendingUp size={16} />
-              <span className="text-sm font-medium">+8.3%</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
-            <div className="text-sm text-gray-500">Rejected Requests</div>
-            <div className="text-xs text-gray-400 mt-1">from last month</div>
-          </div>
-        </div>
+        <HrCard
+          title="Total Requests"
+          value="124"
+          change={5.2}
+          icon={Calendar}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+          subtitle="from last month"
+        />
+        <HrCard
+          title="Pending requests"
+          value="118"
+          change={2.1}
+          icon={Clock}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+          subtitle="from last month"
+        />
+        <HrCard
+          title="Approved requests"
+          value="8"
+          change={-12.5}
+          icon={CheckCircle}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+          subtitle="from last month"
+        />
+        <HrCard
+          title="Rejected Requests"
+          value="8"
+          change={8.3}
+          icon={XCircle}
+          iconBgColor="bg-red-50"
+          iconColor="text-primary"
+          subtitle="from last month"
+        />
       </div>
 
       {/* Filters and Search */}
