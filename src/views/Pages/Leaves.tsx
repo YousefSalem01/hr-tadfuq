@@ -1,0 +1,302 @@
+import { useState } from 'react';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  ChevronDown, 
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  Edit,
+  TrendingUp,
+  TrendingDown
+} from 'lucide-react';
+import LeaveRequestModal from '../../components/LeaveRequestModal';
+
+interface Leave {
+  id: number;
+  employeeName: string;
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  status: 'Approved' | 'pending' | 'Rejected' | 'Active';
+}
+
+const leaves: Leave[] = [
+  { id: 1, employeeName: 'Olivia Rhye', leaveType: 'Sick', startDate: 'Nov 1, 2025', endDate: 'Dec 5, 2025', days: 4, status: 'Approved' },
+  { id: 2, employeeName: 'Phoenix Baker', leaveType: 'Casual', startDate: 'Nov 1, 2025', endDate: 'Dec 5, 2025', days: 5, status: 'pending' },
+  { id: 3, employeeName: 'Lana Steiner', leaveType: 'Maternity', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 8, status: 'Approved' },
+  { id: 4, employeeName: 'Demi Wilkinson', leaveType: 'Paternity', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 7, status: 'Rejected' },
+  { id: 5, employeeName: 'Candice Wu', leaveType: 'Bereavement', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 1, status: 'Approved' },
+  { id: 6, employeeName: 'Natali Craig', leaveType: 'Vacation', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 2, status: 'Approved' },
+  { id: 7, employeeName: 'Drew Cano', leaveType: 'Personal', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 4, status: 'Approved' },
+  { id: 8, employeeName: 'Orlando Diggs', leaveType: 'Unpaid', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
+  { id: 9, employeeName: 'Andi Lane', leaveType: 'Compassionate', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
+  { id: 10, employeeName: 'Kate Morrison', leaveType: 'Jury Duty', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 7, status: 'Active' },
+  { id: 11, employeeName: 'Jasper Lee', leaveType: 'Study Leave', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
+  { id: 12, employeeName: 'Sienna Faye', leaveType: 'Sabbatical', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 5, status: 'Approved' },
+  { id: 13, employeeName: 'Gideon Parks', leaveType: 'Public Holiday', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 6, status: 'Approved' },
+  { id: 14, employeeName: 'Zara Ellis', leaveType: 'Family Leave', startDate: 'Dec 15, 2025', endDate: 'Jan 10, 2026', days: 4, status: 'Approved' },
+];
+
+const Leaves = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmitLeaveRequest = (data: any) => {
+    // Handle leave request submission
+    console.log('Leave request data:', data);
+    // You can add the leave request to the list here
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Approved':
+      case 'Active':
+        return 'bg-green-500';
+      case 'pending':
+        return 'bg-orange-500';
+      case 'Rejected':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const getStatusTextColor = (status: string) => {
+    switch (status) {
+      case 'Approved':
+      case 'Active':
+        return 'text-green-700';
+      case 'pending':
+        return 'text-orange-700';
+      case 'Rejected':
+        return 'text-red-700';
+      default:
+        return 'text-gray-700';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Leaves managements</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage employee time off with ease.</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark"
+        >
+          <Plus size={16} />
+          New Request
+        </button>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        {/* Total Requests */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-red-50 rounded-lg">
+              <Calendar className="text-primary" size={24} />
+            </div>
+            <div className="flex items-center gap-1 text-green-600">
+              <TrendingUp size={16} />
+              <span className="text-sm font-medium">+5.2%</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">124</div>
+            <div className="text-sm text-gray-500">Total Requests</div>
+            <div className="text-xs text-gray-400 mt-1">from last month</div>
+          </div>
+        </div>
+
+        {/* Pending requests */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-red-50 rounded-lg">
+              <Clock className="text-primary" size={24} />
+            </div>
+            <div className="flex items-center gap-1 text-green-600">
+              <TrendingUp size={16} />
+              <span className="text-sm font-medium">+2.1%</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">118</div>
+            <div className="text-sm text-gray-500">Pending requests</div>
+            <div className="text-xs text-gray-400 mt-1">from last month</div>
+          </div>
+        </div>
+
+        {/* Approved requests */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-red-50 rounded-lg">
+              <CheckCircle className="text-primary" size={24} />
+            </div>
+            <div className="flex items-center gap-1 text-red-600">
+              <TrendingDown size={16} />
+              <span className="text-sm font-medium">-12.5%</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
+            <div className="text-sm text-gray-500">Approved requests</div>
+            <div className="text-xs text-gray-400 mt-1">from last month</div>
+          </div>
+        </div>
+
+        {/* Rejected Requests */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="p-3 bg-red-50 rounded-lg">
+              <XCircle className="text-primary" size={24} />
+            </div>
+            <div className="flex items-center gap-1 text-green-600">
+              <TrendingUp size={16} />
+              <span className="text-sm font-medium">+8.3%</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">8</div>
+            <div className="text-sm text-gray-500">Rejected Requests</div>
+            <div className="text-xs text-gray-400 mt-1">from last month</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search employees..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <Filter size={20} className="text-gray-600" />
+          </button>
+          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+            <option>All leave types</option>
+            <option>Sick</option>
+            <option>Casual</option>
+            <option>Maternity</option>
+            <option>Paternity</option>
+            <option>Vacation</option>
+            <option>Personal</option>
+            <option>Unpaid</option>
+            <option>Bereavement</option>
+            <option>Compassionate</option>
+            <option>Jury Duty</option>
+            <option>Study Leave</option>
+            <option>Sabbatical</option>
+            <option>Public Holiday</option>
+            <option>Family Leave</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Leaves Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Company</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Leave type</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Start date</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">End date</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Days</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
+                  <div className="flex items-center gap-1">
+                    Status
+                    <ChevronDown size={14} className="text-gray-400" />
+                  </div>
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaves.map((leave) => (
+                <tr key={leave.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                        {getInitials(leave.employeeName)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{leave.employeeName}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-sm text-gray-700">{leave.leaveType}</div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-sm text-gray-700">{leave.startDate}</div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-sm text-gray-700">{leave.endDate}</div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-sm text-gray-700">{leave.days} Days</div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${getStatusColor(leave.status)}`}></div>
+                      <span className={`text-sm font-medium ${getStatusTextColor(leave.status)}`}>
+                        {formatStatus(leave.status)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-end gap-2">
+                      <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900">
+                        <Edit size={16} />
+                      </button>
+                      <button className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Leave Request Modal */}
+      <LeaveRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmitLeaveRequest}
+      />
+    </div>
+  );
+};
+
+export default Leaves;
+
