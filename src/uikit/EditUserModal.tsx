@@ -1,6 +1,7 @@
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, User, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -61,33 +62,27 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user, roles }: EditUserModal
 
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <HrInput
+              label="Full Name"
+              variant="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              icon={User}
+              iconPosition="left"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <HrInput
+              label="Email"
+              variant="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              icon={Mail}
+              iconPosition="left"
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

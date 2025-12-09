@@ -1,6 +1,7 @@
-import { X, Calendar, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, User, Mail, Briefcase, Phone, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
 
 interface AddEmployeeModalProps {
   isOpen: boolean;
@@ -77,52 +78,35 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Full Name"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Full Name"
+                variant="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Full Name"
+                required
+                icon={User}
+                iconPosition="left"
+              />
 
-              {/* Role */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role
-                </label>
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Role"
+                variant="text"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                icon={Briefcase}
+                iconPosition="left"
+              />
 
-              {/* Join Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Join Date
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="joinDate"
-                    value={formData.joinDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="Join Date"
+                variant="date"
+                name="joinDate"
+                value={formData.joinDate}
+                onChange={handleChange}
+              />
 
               {/* Phone Number */}
               <div>
@@ -141,63 +125,52 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
                     <option value="EG">EG</option>
                     <option value="AE">AE</option>
                   </select>
-                  <input
-                    type="text"
+                  <HrInput
+                    variant="tel"
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleChange}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    containerClassName="flex-1"
                   />
                 </div>
               </div>
 
-              {/* Address */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Address"
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                />
-              </div>
+              <HrInput
+                label="Address"
+                variant="textarea"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Address"
+                rows={3}
+                icon={MapPin}
+                iconPosition="left"
+              />
 
-              {/* Emergency Contact */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Emergency Contact
-                </label>
-                <input
-                  type="text"
-                  name="emergencyContact"
-                  value={formData.emergencyContact}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Emergency Contact"
+                variant="text"
+                name="emergencyContact"
+                value={formData.emergencyContact}
+                onChange={handleChange}
+                icon={Phone}
+                iconPosition="left"
+              />
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Email"
+                variant="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                required
+                icon={Mail}
+                iconPosition="left"
+              />
 
               {/* Department */}
               <div>
@@ -225,22 +198,20 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Salary
                 </label>
-                <div className="flex gap-2">
-                  <div className="flex items-center px-3 border border-gray-300 rounded-l-lg bg-gray-50">
-                    <span className="text-gray-700">$</span>
-                  </div>
-                  <input
-                    type="text"
+                <div className="flex gap-1">
+                  <HrInput
+                    variant="number"
                     name="salary"
                     value={formData.salary}
                     onChange={handleChange}
-                    className="flex-1 px-4 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    prefix="$"
+                    containerClassName="flex-1"
                   />
                   <select
                     name="salaryCurrency"
                     value={formData.salaryCurrency}
                     onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>

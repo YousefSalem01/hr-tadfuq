@@ -1,6 +1,7 @@
-import { X, Calendar, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, DollarSign, Clock } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
 
 interface CreatePayrollModalProps {
   isOpen: boolean;
@@ -97,21 +98,19 @@ const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalPro
                   Basic Salary
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex items-center px-3 border border-gray-300 rounded-l-lg bg-gray-50">
-                    <span className="text-gray-700">$</span>
-                  </div>
-                  <input
-                    type="text"
+                  <HrInput
+                    variant="number"
                     name="basicSalary"
                     value={formData.basicSalary}
                     onChange={handleChange}
-                    className="flex-1 px-4 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    prefix="$"
+                    containerClassName="flex-1"
                   />
                   <select
                     name="salaryCurrency"
                     value={formData.salaryCurrency}
                     onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -121,81 +120,54 @@ const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalPro
                 </div>
               </div>
 
-              {/* Deductions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deductions
-                </label>
-                <input
-                  type="text"
-                  name="deductions"
-                  value={formData.deductions}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Deductions"
+                variant="number"
+                name="deductions"
+                value={formData.deductions}
+                onChange={handleChange}
+                icon={DollarSign}
+                iconPosition="left"
+              />
 
-              {/* Deduction Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deduction Type
-                </label>
-                <input
-                  type="text"
-                  name="deductionType"
-                  value={formData.deductionType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Deduction Type"
+                variant="text"
+                name="deductionType"
+                value={formData.deductionType}
+                onChange={handleChange}
+              />
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
-              {/* Month */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Month
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="month"
-                    value={formData.month}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="Month"
+                variant="date"
+                name="month"
+                value={formData.month}
+                onChange={handleChange}
+              />
 
-              {/* Allowances */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Allowances
-                </label>
-                <input
-                  type="text"
-                  name="allowances"
-                  value={formData.allowances}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Allowances"
+                variant="number"
+                name="allowances"
+                value={formData.allowances}
+                onChange={handleChange}
+                icon={DollarSign}
+                iconPosition="left"
+              />
 
-              {/* Overtime Hours */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Overtime Hours
-                </label>
-                <input
-                  type="text"
-                  name="overtimeHours"
-                  value={formData.overtimeHours}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <HrInput
+                label="Overtime Hours"
+                variant="number"
+                name="overtimeHours"
+                value={formData.overtimeHours}
+                onChange={handleChange}
+                icon={Clock}
+                iconPosition="left"
+              />
             </div>
           </div>
 

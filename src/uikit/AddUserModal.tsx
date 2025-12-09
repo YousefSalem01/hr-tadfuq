@@ -1,6 +1,7 @@
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, User, Mail } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -55,35 +56,29 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, roles }: AddUserModalProps) =
 
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter full name"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <HrInput
+              label="Full Name"
+              variant="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter full name"
+              required
+              icon={User}
+              iconPosition="left"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
+            <HrInput
+              label="Email"
+              variant="email"
+              name="email"
+              value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter email address"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+              placeholder="Enter email address"
+              required
+              icon={Mail}
+              iconPosition="left"
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

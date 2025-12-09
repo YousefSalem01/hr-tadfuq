@@ -1,6 +1,7 @@
-import { X, Calendar, ChevronDown } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
 
 interface AddAdvanceModalProps {
   isOpen: boolean;
@@ -117,22 +118,13 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                 </div>
               </div>
 
-              {/* Request Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Request Date
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="requestDate"
-                    value={formData.requestDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="Request Date"
+                variant="date"
+                name="requestDate"
+                value={formData.requestDate}
+                onChange={handleChange}
+              />
 
               {/* Payment Method */}
               <div>
@@ -187,21 +179,19 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                   Requested Amount
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex items-center px-3 border border-gray-300 rounded-l-lg bg-gray-50">
-                    <span className="text-gray-700">$</span>
-                  </div>
-                  <input
-                    type="text"
+                  <HrInput
+                    variant="number"
                     name="requestedAmount"
                     value={formData.requestedAmount}
                     onChange={handleChange}
-                    className="flex-1 px-4 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    prefix="$"
+                    containerClassName="flex-1"
                   />
                   <select
                     name="amountCurrency"
                     value={formData.amountCurrency}
                     onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -211,22 +201,13 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                 </div>
               </div>
 
-              {/* Repayment Start Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Repayment Start Date
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="repaymentStartDate"
-                    value={formData.repaymentStartDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="Repayment Start Date"
+                variant="date"
+                name="repaymentStartDate"
+                value={formData.repaymentStartDate}
+                onChange={handleChange}
+              />
 
               {/* Repayment period */}
               <div>
@@ -234,18 +215,18 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                   Repayment period
                 </label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
+                  <HrInput
+                    variant="number"
                     name="repaymentPeriod"
                     value={formData.repaymentPeriod}
                     onChange={handleChange}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    containerClassName="flex-1"
                   />
                   <select
                     name="repaymentPeriodUnit"
                     value={formData.repaymentPeriodUnit}
                     onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="Days">Days</option>
                     <option value="Weeks">Weeks</option>

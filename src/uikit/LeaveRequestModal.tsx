@@ -1,6 +1,8 @@
-import { X, Calendar, ChevronDown, Upload } from 'lucide-react';
+import { X, ChevronDown, FileText } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
+import HrUpload from './HrUpload/HrUpload';
 
 interface LeaveRequestModalProps {
   isOpen: boolean;
@@ -19,7 +21,7 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
     reason: 'Emergency medical leave',
   });
 
-  const [isDragging, setIsDragging] = useState(false);
+  const [_uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -43,21 +45,11 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
       endDate: '15/11/2023',
       reason: 'Emergency medical leave',
     });
+    setUploadedFiles([]);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    // Handle file drop here
+  const handleFileChange = (files: File[]) => {
+    setUploadedFiles(files);
   };
 
   if (!isOpen) return null;
@@ -138,22 +130,13 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
                 </div>
               </div>
 
-              {/* Start Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="Start Date"
+                variant="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
+              />
             </div>
 
             {/* Right Column */}
@@ -201,63 +184,39 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
                 </div>
               </div>
 
-              {/* End Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                </div>
-              </div>
+              <HrInput
+                label="End Date"
+                variant="date"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
           {/* Attachment Section */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Attachment
-            </label>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                isDragging
-                  ? 'border-primary bg-red-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <div className="flex flex-col items-center justify-center">
-                <Upload className="text-primary mb-3" size={32} />
-                <p className="text-sm font-semibold text-gray-700 mb-1">
-                  Drop files here or click to upload
-                </p>
-                <p className="text-xs text-gray-500">
-                  Drag and drop files here or browse to upload. Only PDFs and DOCs are allowed. Do not upload confidential information.
-                </p>
-              </div>
-            </div>
+            <HrUpload
+              label="Attachment"
+              accept=".pdf,.doc,.docx"
+              maxSize={10}
+              multiple
+              onChange={handleFileChange}
+              helperText="Do not upload confidential information"
+            />
           </div>
 
           {/* Reason Text Area */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason
-            </label>
-            <textarea
+            <HrInput
+              label="Reason"
+              variant="textarea"
               name="reason"
               value={formData.reason}
               onChange={handleChange}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              icon={FileText}
+              iconPosition="left"
             />
           </div>
 
