@@ -15,12 +15,15 @@ import {
 import AddAdvanceModal from '../uikit/AddAdvanceModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
-import { mockAdvanceRecords, AdvanceRecord } from '../data/mock';
+import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockAdvanceRecords, AdvanceRecord, advanceStatusOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 const Advance = () => {
   const [advanceRecords, setAdvanceRecords] = useState<AdvanceRecord[]>(mockAdvanceRecords);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('Completed');
   const itemsPerPage = 10;
   const totalPages = Math.ceil(advanceRecords.length / itemsPerPage);
 
@@ -148,12 +151,17 @@ const Advance = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>Completed</option>
-            <option>Active</option>
-            <option>Pending</option>
-            <option>Hold</option>
-          </select>
+          <HrSelectMenu
+            name="statusFilter"
+            placeholder="Select Status"
+            options={advanceStatusOptions}
+            value={advanceStatusOptions.find(option => option.value === selectedStatus) || null}
+            onChange={(option) => {
+              const selected = option as SingleValue<SelectOption>;
+              setSelectedStatus(selected ? selected.value : 'Completed');
+            }}
+            isSearchable={false}
+          />
           <HrButton variant="secondary" icon={Download}>
             Export Report
           </HrButton>

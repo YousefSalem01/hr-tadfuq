@@ -15,12 +15,15 @@ import {
 import AddDocumentsModal from '../uikit/AddDocumentsModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
-import { mockDocuments, DocumentRecord } from '../data/mock';
+import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockDocuments, DocumentRecord, documentStatusOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 const Documents = () => {
   const [documentRecords, setDocumentRecords] = useState<DocumentRecord[]>(mockDocuments);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState('type');
   const itemsPerPage = 10;
   const totalPages = Math.ceil(documentRecords.length / itemsPerPage);
 
@@ -142,14 +145,17 @@ const Documents = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>type</option>
-            <option>Certificate</option>
-            <option>License</option>
-            <option>Passport</option>
-            <option>Visa</option>
-            <option>ID Card</option>
-          </select>
+          <HrSelectMenu
+            name="documentTypeFilter"
+            placeholder="Select Type"
+            options={documentStatusOptions}
+            value={documentStatusOptions.find(option => option.value === selectedDocType) || null}
+            onChange={(option) => {
+              const selected = option as SingleValue<SelectOption>;
+              setSelectedDocType(selected ? selected.value : 'type');
+            }}
+            isSearchable={false}
+          />
           <HrButton variant="secondary" icon={Download}>
             Export Report
           </HrButton>

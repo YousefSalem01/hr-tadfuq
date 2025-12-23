@@ -1,7 +1,10 @@
-import { X, Building, User, FileText } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
+import HrSelectMenu from './HrSelectMenu/HrSelectMenu';
+import { employeeOptions, departmentNameOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 interface AddDepartmentModalProps {
   isOpen: boolean;
@@ -21,6 +24,13 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }: AddDepartmentModalPro
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (name: string, option: SelectOption | null) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: option ? option.value : '',
     }));
   };
 
@@ -58,27 +68,23 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }: AddDepartmentModalPro
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
-            <HrInput
-              label="Department Name"
-              variant="text"
+            <HrSelectMenu
               name="departmentName"
-              value={formData.departmentName}
-              onChange={handleChange}
-              placeholder="e.g., Engineering"
-              icon={Building}
-              iconPosition="left"
+              label="Department Name"
+              placeholder="Select or type department name"
+              options={departmentNameOptions}
+              value={departmentNameOptions.find(option => option.value === formData.departmentName) || null}
+              onChange={(option) => handleSelectChange('departmentName', option as SingleValue<SelectOption>)}
               required
             />
 
-            <HrInput
-              label="Head of Department"
-              variant="text"
+            <HrSelectMenu
               name="headOfDepartment"
-              value={formData.headOfDepartment}
-              onChange={handleChange}
-              placeholder="e.g., Ali Maged"
-              icon={User}
-              iconPosition="left"
+              label="Head of Department"
+              placeholder="Select employee"
+              options={employeeOptions}
+              value={employeeOptions.find(option => option.value === formData.headOfDepartment) || null}
+              onChange={(option) => handleSelectChange('headOfDepartment', option as SingleValue<SelectOption>)}
             />
 
             <HrInput

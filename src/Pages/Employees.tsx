@@ -19,7 +19,8 @@ import {
 import AddEmployeeModal from '../uikit/AddEmployeeModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
-import { mockEmployees, mockDepartments, Employee } from '../data/mock';
+import HrSelectMenu, { Option } from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockEmployees, Employee, departmentOptions, statusOptions } from '../data/mock';
 
 const Employees = () => {
   const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);
@@ -35,9 +36,8 @@ const Employees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [departments] = useState(mockDepartments);
+  const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<Option | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -53,11 +53,11 @@ const Employees = () => {
     }
 
     if (selectedDepartment) {
-      filtered = filtered.filter(emp => emp.department === selectedDepartment);
+      filtered = filtered.filter(emp => emp.department === selectedDepartment.value);
     }
 
     if (selectedStatus) {
-      filtered = filtered.filter(emp => emp.status === selectedStatus);
+      filtered = filtered.filter(emp => emp.status === selectedStatus.value);
     }
 
     // Update statistics
@@ -114,13 +114,13 @@ const Employees = () => {
     setCurrentPage(1); // Reset to first page on search
   };
 
-  const handleDepartmentFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedDepartment(e.target.value);
+  const handleDepartmentFilter = (option: Option | readonly Option[] | null) => {
+    setSelectedDepartment(Array.isArray(option) ? null : (option as Option | null));
     setCurrentPage(1);
   };
 
-  const handleStatusFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStatus(e.target.value);
+  const handleStatusFilter = (option: Option | readonly Option[] | null) => {
+    setSelectedStatus(Array.isArray(option) ? null : (option as Option | null));
     setCurrentPage(1);
   };
 
@@ -243,26 +243,26 @@ const Employees = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select 
+          <div className="w-48">
+            <HrSelectMenu
+              name="department"
+              placeholder="All Departments"
+              options={[{ value: '', label: 'All Departments' }, ...departmentOptions]}
             value={selectedDepartment}
             onChange={handleDepartmentFilter}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-          >
-            <option value="">All Departments</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.name}>{dept.name}</option>
-            ))}
-          </select>
-          <select 
+              isSearchable={false}
+            />
+          </div>
+          <div className="w-40">
+            <HrSelectMenu
+              name="status"
+              placeholder="All Statuses"
+              options={[{ value: '', label: 'All Statuses' }, ...statusOptions]}
             value={selectedStatus}
             onChange={handleStatusFilter}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-          >
-            <option value="">All Statuses</option>
-            <option value="Active">Active</option>
-            <option value="On Leave">On Leave</option>
-            <option value="Inactive">Inactive</option>
-          </select>
+              isSearchable={false}
+            />
+          </div>
         </div>
       </div>
 

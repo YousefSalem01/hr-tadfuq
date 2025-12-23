@@ -1,7 +1,9 @@
-import { X, ChevronDown, DollarSign, Clock } from 'lucide-react';
+import { X, DollarSign, Clock } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
+import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
+import { mockEmployees, currencyOptions } from '../data/mock';
 
 interface CreatePayrollModalProps {
   isOpen: boolean;
@@ -10,18 +12,23 @@ interface CreatePayrollModalProps {
 }
 
 const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalProps) => {
+  const employeeOptions: Option[] = mockEmployees.map(emp => ({
+    value: emp.name,
+    label: emp.name,
+  }));
+
   const [formData, setFormData] = useState({
-    employeeName: '',
+    employeeName: null as Option | null,
     month: '15/11/2023',
     basicSalary: '1,000.00',
-    salaryCurrency: 'USD',
+    salaryCurrency: currencyOptions[0],
     allowances: '0.00',
     deductions: '0.00',
     deductionType: 'Bonus',
     overtimeHours: '0',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -29,16 +36,29 @@ const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalPro
     }));
   };
 
+  const handleSelectChange = (name: string, value: Option | null) => {
+    if (value) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      employeeName: formData.employeeName?.value || '',
+      salaryCurrency: formData.salaryCurrency.value,
+    });
     onClose();
     // Reset form
     setFormData({
-      employeeName: '',
+      employeeName: null,
       month: '15/11/2023',
       basicSalary: '1,000.00',
-      salaryCurrency: 'USD',
+      salaryCurrency: currencyOptions[0],
       allowances: '0.00',
       deductions: '0.00',
       deductionType: 'Bonus',
@@ -70,27 +90,15 @@ const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalPro
             {/* Left Column */}
             <div className="space-y-4">
               {/* Employee Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Employee Name
-                </label>
-                <div className="relative">
-                  <select
-                    name="employeeName"
-                    value={formData.employeeName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">select employee</option>
-                    <option value="Olivia Rhye">Olivia Rhye</option>
-                    <option value="Liam Smith">Liam Smith</option>
-                    <option value="Ava Johnson">Ava Johnson</option>
-                    <option value="Noah Brown">Noah Brown</option>
-                    <option value="Isabella Davis">Isabella Davis</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="employeeName"
+                label="Employee Name"
+                placeholder="Select employee"
+                options={employeeOptions}
+                value={formData.employeeName}
+                onChange={(option) => handleSelectChange('employeeName', option as Option)}
+                required
+              />
 
               {/* Basic Salary */}
               <div>
@@ -106,17 +114,15 @@ const CreatePayrollModal = ({ isOpen, onClose, onSubmit }: CreatePayrollModalPro
                     prefix="$"
                     containerClassName="flex-1"
                   />
-                  <select
-                    name="salaryCurrency"
-                    value={formData.salaryCurrency}
-                    onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="AED">AED</option>
-                  </select>
+                  <div className="w-32">
+                    <HrSelectMenu
+                      name="salaryCurrency"
+                      options={currencyOptions}
+                      value={formData.salaryCurrency}
+                      onChange={(option) => handleSelectChange('salaryCurrency', option as Option)}
+                      isSearchable={false}
+                    />
+                  </div>
                 </div>
               </div>
 

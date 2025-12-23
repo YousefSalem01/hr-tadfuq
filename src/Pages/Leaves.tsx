@@ -15,7 +15,8 @@ import LeaveRequestModal from '../uikit/LeaveRequestModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
 import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
-import { mockLeaves, Leave } from '../data/mock';
+import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockLeaves, Leave, leaveTypeOptions } from '../data/mock';
 
 const Leaves = () => {
   const [leaves, setLeaves] = useState<Leave[]>(mockLeaves);
@@ -160,23 +161,16 @@ const Leaves = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>All leave types</option>
-            <option>Sick</option>
-            <option>Casual</option>
-            <option>Maternity</option>
-            <option>Paternity</option>
-            <option>Vacation</option>
-            <option>Personal</option>
-            <option>Unpaid</option>
-            <option>Bereavement</option>
-            <option>Compassionate</option>
-            <option>Jury Duty</option>
-            <option>Study Leave</option>
-            <option>Sabbatical</option>
-            <option>Public Holiday</option>
-            <option>Family Leave</option>
-          </select>
+          <div className="w-48">
+            <HrSelectMenu
+              name="leaveType"
+              placeholder="All leave types"
+              options={[{ value: '', label: 'All leave types' }, ...leaveTypeOptions]}
+              value={null}
+              onChange={() => {}}
+              isSearchable={false}
+            />
+          </div>
         </div>
       </div>
 

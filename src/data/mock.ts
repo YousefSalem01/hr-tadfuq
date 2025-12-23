@@ -1,6 +1,172 @@
 // Centralized Mock Data for HR Management System
 
 // ============================================================================
+// COMMON OPTIONS FOR SELECT MENUS
+// ============================================================================
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export const departmentOptions: SelectOption[] = [
+  { value: 'Engineering', label: 'Engineering' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'HR', label: 'HR' },
+  { value: 'Human Resources', label: 'Human Resources' },
+];
+
+export const departmentNameOptions: SelectOption[] = [
+  { value: 'Engineering', label: 'Engineering' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'Human Resources', label: 'Human Resources' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'IT', label: 'IT' },
+  { value: 'Operations', label: 'Operations' },
+  { value: 'Customer Service', label: 'Customer Service' },
+  { value: 'Product', label: 'Product' },
+  { value: 'Design', label: 'Design' },
+  { value: 'Legal', label: 'Legal' },
+  { value: 'Research & Development', label: 'Research & Development' },
+];
+
+export const branchOptions: SelectOption[] = [
+  { value: 'Main Office', label: 'Main Office' },
+  { value: 'Branch 1', label: 'Branch 1' },
+  { value: 'Branch 2', label: 'Branch 2' },
+];
+
+export const currencyOptions: SelectOption[] = [
+  { value: 'USD', label: 'USD' },
+  { value: 'EUR', label: 'EUR' },
+  { value: 'GBP', label: 'GBP' },
+  { value: 'AED', label: 'AED' },
+];
+
+export const phoneCountryOptions: SelectOption[] = [
+  { value: 'US', label: 'US' },
+  { value: 'UK', label: 'UK' },
+  { value: 'EG', label: 'EG' },
+  { value: 'AE', label: 'AE' },
+];
+
+export const leaveTypeOptions: SelectOption[] = [
+  { value: 'Sick', label: 'Sick' },
+  { value: 'Casual', label: 'Casual' },
+  { value: 'Maternity', label: 'Maternity' },
+  { value: 'Paternity', label: 'Paternity' },
+  { value: 'Bereavement', label: 'Bereavement' },
+  { value: 'Vacation', label: 'Vacation' },
+  { value: 'Personal', label: 'Personal' },
+  { value: 'Unpaid', label: 'Unpaid' },
+];
+
+export const leaveStatusOptions: SelectOption[] = [
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Rejected', label: 'Rejected' },
+];
+
+export const documentTypeOptions: SelectOption[] = [
+  { value: 'Certificate', label: 'Certificate' },
+  { value: 'ID Card', label: 'ID Card' },
+  { value: 'Passport', label: 'Passport' },
+  { value: 'License', label: 'License' },
+  { value: 'Contract', label: 'Contract' },
+];
+
+export const advanceTypeOptions: SelectOption[] = [
+  { value: 'Salary Advance', label: 'Salary Advance' },
+  { value: 'Emergency', label: 'Emergency' },
+  { value: 'Personal Loan', label: 'Personal Loan' },
+];
+
+export const paymentMethodOptions: SelectOption[] = [
+  { value: 'Bank Transfer', label: 'Bank Transfer' },
+  { value: 'Cash', label: 'Cash' },
+  { value: 'Cheque', label: 'Cheque' },
+];
+
+export const statusOptions: SelectOption[] = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Inactive', label: 'Inactive' },
+  { value: 'On Leave', label: 'On Leave' },
+];
+
+export const employeeOptions: SelectOption[] = [
+  { value: 'Olivia Rhye', label: 'Olivia Rhye' },
+  { value: 'Phoenix Baker', label: 'Phoenix Baker' },
+  { value: 'Lana Steiner', label: 'Lana Steiner' },
+  { value: 'Demi Wilkinson', label: 'Demi Wilkinson' },
+  { value: 'Candice Wu', label: 'Candice Wu' },
+  { value: 'Liam Smith', label: 'Liam Smith' },
+  { value: 'Ava Johnson', label: 'Ava Johnson' },
+  { value: 'Noah Brown', label: 'Noah Brown' },
+  { value: 'Isabella Davis', label: 'Isabella Davis' },
+  { value: 'Mason Wilson', label: 'Mason Wilson' },
+  { value: 'Sophia Garcia', label: 'Sophia Garcia' },
+  { value: 'Sarah Ahmed', label: 'Sarah Ahmed' },
+  { value: 'Ali Maged', label: 'Ali Maged' },
+  { value: 'John Smith', label: 'John Smith' },
+  { value: 'Mohamed Ali', label: 'Mohamed Ali' },
+];
+
+export const advanceStatusOptions: SelectOption[] = [
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Hold', label: 'Hold' },
+];
+
+export const documentStatusOptions: SelectOption[] = [
+  { value: 'type', label: 'type' },
+  { value: 'Certificate', label: 'Certificate' },
+  { value: 'License', label: 'License' },
+  { value: 'Passport', label: 'Passport' },
+  { value: 'Visa', label: 'Visa' },
+  { value: 'ID Card', label: 'ID Card' },
+];
+
+export const payrollMonthOptions: SelectOption[] = [
+  { value: '', label: 'All Months' },
+  { value: '2025-01', label: 'January 2025' },
+  { value: '2025-02', label: 'February 2025' },
+  { value: '2025-03', label: 'March 2025' },
+  { value: '2025-04', label: 'April 2025' },
+  { value: '2025-05', label: 'May 2025' },
+  { value: '2025-06', label: 'June 2025' },
+  { value: '2025-07', label: 'July 2025' },
+  { value: '2025-08', label: 'August 2025' },
+  { value: '2025-09', label: 'September 2025' },
+  { value: '2025-10', label: 'October 2025' },
+  { value: '2025-11', label: 'November 2025' },
+  { value: '2025-12', label: 'December 2025' },
+];
+
+export const actionFilterOptions: SelectOption[] = [
+  { value: 'All', label: 'All Actions' },
+  { value: 'Created', label: 'Created' },
+  { value: 'Updated', label: 'Updated' },
+  { value: 'Deleted', label: 'Deleted' },
+  { value: 'Permission Changed', label: 'Permission Changed' },
+  { value: 'Logged In', label: 'Logged In' },
+  { value: 'Logged Out', label: 'Logged Out' },
+];
+
+export const entityFilterOptions: SelectOption[] = [
+  { value: 'All', label: 'All Entities' },
+  { value: 'Employee', label: 'Employee' },
+  { value: 'Leave Request', label: 'Leave Request' },
+  { value: 'Payroll', label: 'Payroll' },
+  { value: 'Department', label: 'Department' },
+  { value: 'Document', label: 'Document' },
+  { value: 'Advance', label: 'Advance' },
+  { value: 'User', label: 'User' },
+  { value: 'System', label: 'System' },
+];
+
+// ============================================================================
 // DEPARTMENTS
 // ============================================================================
 export interface Department {

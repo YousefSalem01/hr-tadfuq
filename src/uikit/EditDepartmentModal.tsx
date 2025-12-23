@@ -1,6 +1,10 @@
-import { X, ChevronDown } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import HrButton from './HrButton/HrButton';
+import HrInput from './HrInput/HrInput';
+import HrSelectMenu from './HrSelectMenu/HrSelectMenu';
+import { employeeOptions, departmentNameOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 interface EditDepartmentModalProps {
   isOpen: boolean;
@@ -39,6 +43,13 @@ const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }: EditDepa
     }));
   };
 
+  const handleSelectChange = (name: string, option: SelectOption | null) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: option ? option.value : '',
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ ...formData, id: department?.id });
@@ -68,58 +79,38 @@ const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }: EditDepa
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
             {/* Department Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Department Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="departmentName"
-                  value={formData.departmentName}
-                  onChange={handleChange}
-                  placeholder="e.g., Engineering"
-                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-              </div>
-            </div>
+            <HrSelectMenu
+              name="departmentName"
+              label="Department Name"
+              placeholder="Select or type department name"
+              options={departmentNameOptions}
+              value={departmentNameOptions.find(option => option.value === formData.departmentName) || null}
+              onChange={(option) => handleSelectChange('departmentName', option as SingleValue<SelectOption>)}
+              required
+            />
 
             {/* Head of Department */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Head of Department
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="headOfDepartment"
-                  value={formData.headOfDepartment}
-                  onChange={handleChange}
-                  placeholder="e.g., Ali Maged"
-                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-              </div>
-            </div>
+            <HrSelectMenu
+              name="headOfDepartment"
+              label="Head of Department"
+              placeholder="Select employee"
+              options={employeeOptions}
+              value={employeeOptions.find(option => option.value === formData.headOfDepartment) || null}
+              onChange={(option) => handleSelectChange('headOfDepartment', option as SingleValue<SelectOption>)}
+            />
 
             {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <div className="relative">
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Brief description of the department"
-                  rows={4}
-                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                />
-                <ChevronDown className="absolute right-3 top-3 text-gray-400 pointer-events-none" size={20} />
-              </div>
-            </div>
+            <HrInput
+              label="Description"
+              variant="textarea"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Brief description of the department"
+              rows={4}
+              icon={FileText}
+              iconPosition="left"
+            />
           </div>
 
           {/* Action Buttons */}

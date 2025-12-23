@@ -1,8 +1,10 @@
-import { X, ChevronDown, FileText } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
 import HrUpload from './HrUpload/HrUpload';
+import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
+import { mockEmployees, departmentOptions, leaveTypeOptions, leaveStatusOptions } from '../data/mock';
 
 interface LeaveRequestModalProps {
   isOpen: boolean;
@@ -11,11 +13,16 @@ interface LeaveRequestModalProps {
 }
 
 const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps) => {
+  const employeeOptions: Option[] = mockEmployees.map(emp => ({
+    value: emp.name,
+    label: emp.name,
+  }));
+
   const [formData, setFormData] = useState({
-    employeeName: '',
-    department: '',
-    leaveType: 'Sick',
-    hrApproval: 'Rejected',
+    employeeName: null as Option | null,
+    department: null as Option | null,
+    leaveType: leaveTypeOptions[0],
+    hrApproval: leaveStatusOptions[2], // Rejected
     startDate: '15/11/2023',
     endDate: '15/11/2023',
     reason: 'Emergency medical leave',
@@ -23,7 +30,7 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
 
   const [_uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -31,16 +38,31 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
     }));
   };
 
+  const handleSelectChange = (name: string, value: Option | null) => {
+    if (value) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      employeeName: formData.employeeName?.value || '',
+      department: formData.department?.value || '',
+      leaveType: formData.leaveType.value,
+      hrApproval: formData.hrApproval.value,
+    });
     onClose();
     // Reset form
     setFormData({
-      employeeName: '',
-      department: '',
-      leaveType: 'Sick',
-      hrApproval: 'Rejected',
+      employeeName: null,
+      department: null,
+      leaveType: leaveTypeOptions[0],
+      hrApproval: leaveStatusOptions[2],
       startDate: '15/11/2023',
       endDate: '15/11/2023',
       reason: 'Emergency medical leave',
@@ -77,58 +99,25 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
             {/* Left Column */}
             <div className="space-y-4">
               {/* Employee Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Employee Name
-                </label>
-                <div className="relative">
-                  <select
-                    name="employeeName"
-                    value={formData.employeeName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">select employee</option>
-                    <option value="Olivia Rhye">Olivia Rhye</option>
-                    <option value="Phoenix Baker">Phoenix Baker</option>
-                    <option value="Lana Steiner">Lana Steiner</option>
-                    <option value="Demi Wilkinson">Demi Wilkinson</option>
-                    <option value="Candice Wu">Candice Wu</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="employeeName"
+                label="Employee Name"
+                placeholder="Select employee"
+                options={employeeOptions}
+                value={formData.employeeName}
+                onChange={(option) => handleSelectChange('employeeName', option as Option)}
+                required
+              />
 
               {/* Leave Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Leave Type
-                </label>
-                <div className="relative">
-                  <select
-                    name="leaveType"
-                    value={formData.leaveType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="Sick">Sick</option>
-                    <option value="Casual">Casual</option>
-                    <option value="Maternity">Maternity</option>
-                    <option value="Paternity">Paternity</option>
-                    <option value="Vacation">Vacation</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Unpaid">Unpaid</option>
-                    <option value="Bereavement">Bereavement</option>
-                    <option value="Compassionate">Compassionate</option>
-                    <option value="Jury Duty">Jury Duty</option>
-                    <option value="Study Leave">Study Leave</option>
-                    <option value="Sabbatical">Sabbatical</option>
-                    <option value="Public Holiday">Public Holiday</option>
-                    <option value="Family Leave">Family Leave</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="leaveType"
+                label="Leave Type"
+                options={leaveTypeOptions}
+                value={formData.leaveType}
+                onChange={(option) => handleSelectChange('leaveType', option as Option)}
+                required
+              />
 
               <HrInput
                 label="Start Date"
@@ -142,47 +131,25 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmit }: LeaveRequestModalProps
             {/* Right Column */}
             <div className="space-y-4">
               {/* Department */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
-                <div className="relative">
-                  <select
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">select Department</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Sales">Sales</option>
-                    <option value="HR">HR</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="department"
+                label="Department"
+                placeholder="Select Department"
+                options={departmentOptions}
+                value={formData.department}
+                onChange={(option) => handleSelectChange('department', option as Option)}
+                required
+              />
 
               {/* HR Approval */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  HR Approval <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="hrApproval"
-                    value={formData.hrApproval}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="hrApproval"
+                label="HR Approval"
+                options={leaveStatusOptions}
+                value={formData.hrApproval}
+                onChange={(option) => handleSelectChange('hrApproval', option as Option)}
+                required
+              />
 
               <HrInput
                 label="End Date"

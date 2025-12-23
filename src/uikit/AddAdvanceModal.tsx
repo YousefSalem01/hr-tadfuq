@@ -1,7 +1,9 @@
-import { X, ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
+import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
+import { mockEmployees, departmentOptions, advanceTypeOptions, currencyOptions, paymentMethodOptions } from '../data/mock';
 
 interface AddAdvanceModalProps {
   isOpen: boolean;
@@ -10,20 +12,32 @@ interface AddAdvanceModalProps {
 }
 
 const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) => {
+  const employeeOptions: Option[] = mockEmployees.map(emp => ({
+    value: emp.name,
+    label: emp.name,
+  }));
+
+  const repaymentPeriodUnitOptions: Option[] = [
+    { value: 'Days', label: 'Days' },
+    { value: 'Weeks', label: 'Weeks' },
+    { value: 'Months', label: 'Months' },
+    { value: 'Years', label: 'Years' },
+  ];
+
   const [formData, setFormData] = useState({
-    employeeName: '',
-    department: '',
-    advanceType: '',
+    employeeName: null as Option | null,
+    department: null as Option | null,
+    advanceType: null as Option | null,
     requestedAmount: '1,000.00',
-    amountCurrency: 'USD',
+    amountCurrency: currencyOptions[0],
     requestDate: '15/11/2023',
     repaymentStartDate: '15/11/2023',
-    paymentMethod: '',
+    paymentMethod: null as Option | null,
     repaymentPeriod: '5',
-    repaymentPeriodUnit: 'Months',
+    repaymentPeriodUnit: repaymentPeriodUnitOptions[2], // Months
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -31,22 +45,39 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
     }));
   };
 
+  const handleSelectChange = (name: string, value: Option | null) => {
+    if (value) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      employeeName: formData.employeeName?.value || '',
+      department: formData.department?.value || '',
+      advanceType: formData.advanceType?.value || '',
+      amountCurrency: formData.amountCurrency.value,
+      paymentMethod: formData.paymentMethod?.value || '',
+      repaymentPeriodUnit: formData.repaymentPeriodUnit.value,
+    });
     onClose();
     // Reset form
     setFormData({
-      employeeName: '',
-      department: '',
-      advanceType: '',
+      employeeName: null,
+      department: null,
+      advanceType: null,
       requestedAmount: '1,000.00',
-      amountCurrency: 'USD',
+      amountCurrency: currencyOptions[0],
       requestDate: '15/11/2023',
       repaymentStartDate: '15/11/2023',
-      paymentMethod: '',
+      paymentMethod: null,
       repaymentPeriod: '5',
-      repaymentPeriodUnit: 'Months',
+      repaymentPeriodUnit: repaymentPeriodUnitOptions[2],
     });
   };
 
@@ -74,49 +105,26 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
             {/* Left Column */}
             <div className="space-y-4">
               {/* Employee Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Employee Name
-                </label>
-                <div className="relative">
-                  <select
-                    name="employeeName"
-                    value={formData.employeeName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">select employee</option>
-                    <option value="Olivia Rhye">Olivia Rhye</option>
-                    <option value="Liam Smith">Liam Smith</option>
-                    <option value="Ava Johnson">Ava Johnson</option>
-                    <option value="Noah Brown">Noah Brown</option>
-                    <option value="Isabella Davis">Isabella Davis</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="employeeName"
+                label="Employee Name"
+                placeholder="Select employee"
+                options={employeeOptions}
+                value={formData.employeeName}
+                onChange={(option) => handleSelectChange('employeeName', option as Option)}
+                required
+              />
 
               {/* Advance Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Advance Type
-                </label>
-                <div className="relative">
-                  <select
-                    name="advanceType"
-                    value={formData.advanceType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">Select Type</option>
-                    <option value="Salary Advance">Salary Advance</option>
-                    <option value="Emergency Advance">Emergency Advance</option>
-                    <option value="Travel Advance">Travel Advance</option>
-                    <option value="Medical Advance">Medical Advance</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="advanceType"
+                label="Advance Type"
+                placeholder="Select Type"
+                options={advanceTypeOptions}
+                value={formData.advanceType}
+                onChange={(option) => handleSelectChange('advanceType', option as Option)}
+                required
+              />
 
               <HrInput
                 label="Request Date"
@@ -127,51 +135,29 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
               />
 
               {/* Payment Method */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Payment Method
-                </label>
-                <div className="relative">
-                  <select
-                    name="paymentMethod"
-                    value={formData.paymentMethod}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">Select Type</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Check">Check</option>
-                    <option value="Direct Deposit">Direct Deposit</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="paymentMethod"
+                label="Payment Method"
+                placeholder="Select Type"
+                options={paymentMethodOptions}
+                value={formData.paymentMethod}
+                onChange={(option) => handleSelectChange('paymentMethod', option as Option)}
+                required
+              />
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
               {/* Department */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
-                <div className="relative">
-                  <select
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">select Department</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Sales">Sales</option>
-                    <option value="HR">HR</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="department"
+                label="Department"
+                placeholder="Select Department"
+                options={departmentOptions}
+                value={formData.department}
+                onChange={(option) => handleSelectChange('department', option as Option)}
+                required
+              />
 
               {/* Requested Amount */}
               <div>
@@ -187,17 +173,15 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                     prefix="$"
                     containerClassName="flex-1"
                   />
-                  <select
-                    name="amountCurrency"
-                    value={formData.amountCurrency}
-                    onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="AED">AED</option>
-                  </select>
+                  <div className="w-32">
+                    <HrSelectMenu
+                      name="amountCurrency"
+                      options={currencyOptions}
+                      value={formData.amountCurrency}
+                      onChange={(option) => handleSelectChange('amountCurrency', option as Option)}
+                      isSearchable={false}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -222,17 +206,15 @@ const AddAdvanceModal = ({ isOpen, onClose, onSubmit }: AddAdvanceModalProps) =>
                     onChange={handleChange}
                     containerClassName="flex-1"
                   />
-                  <select
-                    name="repaymentPeriodUnit"
-                    value={formData.repaymentPeriodUnit}
-                    onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="Days">Days</option>
-                    <option value="Weeks">Weeks</option>
-                    <option value="Months">Months</option>
-                    <option value="Years">Years</option>
-                  </select>
+                  <div className="w-32">
+                    <HrSelectMenu
+                      name="repaymentPeriodUnit"
+                      options={repaymentPeriodUnitOptions}
+                      value={formData.repaymentPeriodUnit}
+                      onChange={(option) => handleSelectChange('repaymentPeriodUnit', option as Option)}
+                      isSearchable={false}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -12,7 +12,9 @@ import {
   User
 } from 'lucide-react';
 import HrButton from '../uikit/HrButton/HrButton';
-import { mockActivityLogs, ActivityLog as ActivityLogType } from '../data/mock';
+import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockActivityLogs, ActivityLog as ActivityLogType, actionFilterOptions, entityFilterOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 const ActivityLog = () => {
   const [activityLogs] = useState<ActivityLogType[]>(mockActivityLogs);
@@ -154,29 +156,28 @@ const ActivityLog = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select 
-            value={actionFilter}
-            onChange={(e) => handleActionFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-          >
-            <option>All Actions</option>
-            <option>Created</option>
-            <option>Updated</option>
-            <option>Deleted</option>
-            <option>Permission Changed</option>
-            <option>Logged In</option>
-            <option>Logged Out</option>
-          </select>
-          <select 
-            value={entityFilter}
-            onChange={(e) => handleEntityFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-          >
-            <option>All Entities</option>
-            {uniqueEntities.map((entity) => (
-              <option key={entity} value={entity}>{entity}</option>
-            ))}
-          </select>
+          <HrSelectMenu
+            name="actionFilter"
+            placeholder="All Actions"
+            options={actionFilterOptions}
+            value={actionFilterOptions.find(option => option.value === actionFilter) || null}
+            onChange={(option) => {
+              const selected = option as SingleValue<SelectOption>;
+              handleActionFilter(selected ? selected.value : 'All');
+            }}
+            isSearchable={false}
+          />
+          <HrSelectMenu
+            name="entityFilter"
+            placeholder="All Entities"
+            options={entityFilterOptions}
+            value={entityFilterOptions.find(option => option.value === entityFilter) || null}
+            onChange={(option) => {
+              const selected = option as SingleValue<SelectOption>;
+              handleEntityFilter(selected ? selected.value : 'All');
+            }}
+            isSearchable={false}
+          />
         </div>
       </div>
 

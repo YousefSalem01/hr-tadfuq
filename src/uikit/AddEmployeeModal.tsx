@@ -1,7 +1,9 @@
-import { X, ChevronDown, User, Mail, Briefcase, Phone, MapPin } from 'lucide-react';
+import { X, User, Mail, Briefcase, Phone, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
+import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
+import { departmentOptions, branchOptions, currencyOptions, phoneCountryOptions } from '../data/mock';
 
 interface AddEmployeeModalProps {
   isOpen: boolean;
@@ -14,18 +16,18 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
     fullName: '',
     email: '',
     role: 'Senior Developer',
-    department: 'Engineering',
+    department: departmentOptions[0],
     joinDate: '15/11/2023',
-    phoneCountry: 'US',
+    phoneCountry: phoneCountryOptions[0],
     phoneNumber: '+20(11) 562 251 11',
     address: '',
     emergencyContact: 'Jane Smith - +20(10) 924 654 37',
     salary: '1,000.00',
-    salaryCurrency: 'USD',
-    branch: 'Main Office',
+    salaryCurrency: currencyOptions[0],
+    branch: branchOptions[0],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -33,24 +35,41 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
     }));
   };
 
+  const handleSelectChange = (name: string, value: Option | null) => {
+    if (value) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd(formData);
+    // Convert Option values back to strings for submission
+    const submitData = {
+      ...formData,
+      department: formData.department.value,
+      phoneCountry: formData.phoneCountry.value,
+      salaryCurrency: formData.salaryCurrency.value,
+      branch: formData.branch.value,
+    };
+    onAdd(submitData);
     onClose();
     // Reset form
     setFormData({
       fullName: '',
       email: '',
       role: 'Senior Developer',
-      department: 'Engineering',
+      department: departmentOptions[0],
       joinDate: '15/11/2023',
-      phoneCountry: 'US',
+      phoneCountry: phoneCountryOptions[0],
       phoneNumber: '+20(11) 562 251 11',
       address: '',
       emergencyContact: 'Jane Smith - +20(10) 924 654 37',
       salary: '1,000.00',
-      salaryCurrency: 'USD',
-      branch: 'Main Office',
+      salaryCurrency: currencyOptions[0],
+      branch: branchOptions[0],
     });
   };
 
@@ -114,17 +133,15 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
                   Phone Number
                 </label>
                 <div className="flex gap-2">
-                  <select
-                    name="phoneCountry"
-                    value={formData.phoneCountry}
-                    onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="US">US</option>
-                    <option value="UK">UK</option>
-                    <option value="EG">EG</option>
-                    <option value="AE">AE</option>
-                  </select>
+                  <div className="w-32">
+                    <HrSelectMenu
+                      name="phoneCountry"
+                      options={phoneCountryOptions}
+                      value={formData.phoneCountry}
+                      onChange={(option) => handleSelectChange('phoneCountry', option as Option)}
+                      isSearchable={false}
+                    />
+                  </div>
                   <HrInput
                     variant="tel"
                     name="phoneNumber"
@@ -173,25 +190,13 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
               />
 
               {/* Department */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
-                <div className="relative">
-                  <select
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="Engineering">Engineering</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Sales">Sales</option>
-                    <option value="HR">HR</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="department"
+                label="Department"
+                options={departmentOptions}
+                value={formData.department}
+                onChange={(option) => handleSelectChange('department', option as Option)}
+              />
 
               {/* Salary */}
               <div>
@@ -207,39 +212,26 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd }: AddEmployeeModalProps) => 
                     prefix="$"
                     containerClassName="flex-1"
                   />
-                  <select
-                    name="salaryCurrency"
-                    value={formData.salaryCurrency}
-                    onChange={handleChange}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="AED">AED</option>
-                  </select>
+                  <div className="w-32">
+                    <HrSelectMenu
+                      name="salaryCurrency"
+                      options={currencyOptions}
+                      value={formData.salaryCurrency}
+                      onChange={(option) => handleSelectChange('salaryCurrency', option as Option)}
+                      isSearchable={false}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Branch */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Branch
-                </label>
-                <div className="relative">
-                  <select
-                    name="branch"
-                    value={formData.branch}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="Main Office">Main Office</option>
-                    <option value="Branch 1">Branch 1</option>
-                    <option value="Branch 2">Branch 2</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                </div>
-              </div>
+              <HrSelectMenu
+                name="branch"
+                label="Branch"
+                options={branchOptions}
+                value={formData.branch}
+                onChange={(option) => handleSelectChange('branch', option as Option)}
+              />
             </div>
           </div>
 

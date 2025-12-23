@@ -15,7 +15,9 @@ import {
 import CreatePayrollModal from '../uikit/CreatePayrollModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
-import { mockPayrollRecords, mockEmployees, PayrollRecord } from '../data/mock';
+import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import { mockPayrollRecords, mockEmployees, PayrollRecord, payrollMonthOptions, SelectOption } from '../data/mock';
+import { SingleValue } from 'react-select';
 
 const Payroll = () => {
   const [allPayrollRecords, setAllPayrollRecords] = useState<PayrollRecord[]>(mockPayrollRecords);
@@ -184,28 +186,18 @@ const Payroll = () => {
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
-          <select 
-            value={selectedMonth}
-            onChange={(e) => {
-              setSelectedMonth(e.target.value);
+          <HrSelectMenu
+            name="monthFilter"
+            placeholder="All Months"
+            options={payrollMonthOptions}
+            value={payrollMonthOptions.find(option => option.value === selectedMonth) || null}
+            onChange={(option) => {
+              const selected = option as SingleValue<SelectOption>;
+              setSelectedMonth(selected ? selected.value : '');
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-          >
-            <option value="">All Months</option>
-            {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date();
-              date.setMonth(i);
-              const month = date.toLocaleString('default', { month: 'long' });
-              const year = new Date().getFullYear();
-              const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
-              return (
-                <option key={monthValue} value={monthValue}>
-                  {month} {year}
-                </option>
-              );
-            })}
-          </select>
+            isSearchable={false}
+          />
           <HrButton variant="secondary" icon={Download}>
             Export Report
           </HrButton>
