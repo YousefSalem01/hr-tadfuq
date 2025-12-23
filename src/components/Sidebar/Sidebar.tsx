@@ -36,7 +36,7 @@ const Sidebar = () => {
     { icon: Receipt, label: 'Advance', path: '/advance' },
     { icon: FolderOpen, label: 'Documents', path: '/documents' },
     { icon: Building2, label: 'Departments', path: '/departments' },
-    { icon: Shield, label: 'Users', path: '/users' },
+    { icon: Shield, label: 'Roles & Permissions', path: '/users' },
     { icon: History, label: 'Activity Log', path: '/activity-log' },
   ];
 

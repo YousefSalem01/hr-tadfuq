@@ -6,9 +6,9 @@ import { queryClient } from './services/queryClient';
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+    <Router>
         <AppRouter />
-      </Router>
+    </Router>
     </QueryClientProvider>
   );
 }
