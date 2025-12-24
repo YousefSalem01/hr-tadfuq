@@ -130,8 +130,6 @@ const ActivityLog = () => {
     filterLogs(searchTerm, actionFilter, value);
   };
 
-  const uniqueEntities = Array.from(new Set(activityLogs.map(log => log.entity)));
-
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header */}
