@@ -12,6 +12,7 @@ import Documents from '../Pages/Documents';
 import Departments from '../Pages/Departments';
 import Users from '../Pages/Users';
 import ActivityLog from '../Pages/ActivityLog';
+import Settings from '../Pages/Settings';
 import NotFound from '../components/NotFound/NotFound';
 
 const AppRouter = () => {
@@ -35,6 +36,7 @@ const AppRouter = () => {
                 <Route path="/departments" element={<Departments />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/activity-log" element={<ActivityLog />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

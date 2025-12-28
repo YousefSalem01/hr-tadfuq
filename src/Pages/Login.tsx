@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,7 +29,7 @@ const Login = () => {
 
     try {
       // TODO: Implement login logic
-     
+      navigate('/');
     } catch (error: any) {
       setError(error.message || 'Login failed. Please try again.');
     } finally {

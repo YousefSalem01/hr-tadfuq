@@ -853,3 +853,38 @@ export const mockDashboardStats: DashboardStats = {
   monthly_payroll: 215750,
 };
 
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+export interface AppNotification {
+  id: number;
+  title: string;
+  message: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
+export const mockNotifications: AppNotification[] = [
+  {
+    id: 1,
+    title: 'Leave request',
+    message: 'Phoenix Baker submitted a leave request.',
+    createdAt: '2025-12-28 09:10',
+    isRead: false,
+  },
+  {
+    id: 2,
+    title: 'Payroll',
+    message: 'January payroll draft is ready for review.',
+    createdAt: '2025-12-27 17:45',
+    isRead: false,
+  },
+  {
+    id: 3,
+    title: 'Document expiry',
+    message: 'A visa document will expire in 7 days.',
+    createdAt: '2025-12-26 13:05',
+    isRead: true,
+  },
+];
+
