@@ -1,24 +1,42 @@
 import { useForm } from 'react-hook-form';
-import { Mail, Lock } from 'lucide-react';
-import HrInput from '../../../uikit/HrInput/HrInput';
-import type { LoginFormData, LoginFormProps } from '../types';
+import { User, Mail, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import HrInput from '../../../../uikit/HrInput/HrInput';
+import type { SignupFormData, SignupFormProps } from '../types';
 
-const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
+const SignupForm = ({ onSubmit, isLoading, error }: SignupFormProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
+  } = useForm<SignupFormData>({
     defaultValues: {
+      username: '',
       email: '',
       password: '',
-      rememberMe: false,
     },
   });
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Username Field */}
+        <HrInput
+          label="Username"
+          variant="text"
+          placeholder="Enter your username"
+          icon={User}
+          iconPosition="left"
+          error={errors.username?.message}
+          {...register('username', {
+            required: 'Username is required',
+            minLength: {
+              value: 3,
+              message: 'Username must be at least 3 characters',
+            },
+          })}
+        />
+
         {/* Email Field */}
         <HrInput
           label="Email Address"
@@ -54,21 +72,6 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
           })}
         />
 
-        {/* Remember Me and Forgot Password */}
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register('rememberMe')}
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-            />
-            <span className="text-sm text-gray-700">Remember me</span>
-          </label>
-          <a href="#" className="text-sm text-primary hover:underline">
-            Forgot password?
-          </a>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -82,7 +85,7 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
           disabled={isLoading}
           className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Signing In...' : 'Sign In'}
+          {isLoading ? 'Creating Account...' : 'Sign Up'}
         </button>
       </form>
 
@@ -96,15 +99,15 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
       {/* Additional Options */}
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <a href="#" className="text-primary font-medium hover:underline">
-            Contact Administrator
-          </a>
+          Already have an account?{' '}
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Sign In
+          </Link>
         </p>
       </div>
     </div>
   );
 };
 
-export default LoginForm;
+export default SignupForm;
 

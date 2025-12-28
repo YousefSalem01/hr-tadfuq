@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Header from '../components/Header/Header';
-import Login from '../Pages/Login/Login';
+import { Login, Signup } from '../Pages/Auth';
 import Dashboard from '../Pages/Dashboard';
 import Employees from '../Pages/Employees';
 import Attendance from '../Pages/Attendance';
@@ -19,6 +19,7 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/*" element={
         <div className="flex h-screen bg-gray-50">
