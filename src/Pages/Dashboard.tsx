@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import HrCard from '../uikit/HrCard/HrCard';
 import DepartmentChart from '../uikit/DepartmentChart';
@@ -6,13 +6,19 @@ import RecentActivities from '../uikit/RecentActivities';
 import HrTable from '../uikit/HrTable/HrTable';
 import { Users, UserCheck, Calendar, DollarSign, Edit, Trash2, HelpCircle } from 'lucide-react';
 import { mockDashboardStats, mockEmployees, Employee } from '../data/mock';
-import { getInitials } from '../utils';
+import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
+import EditEmployeeDashboardModal from '../uikit/EditEmployeeDashboardModal';
 
 const Dashboard = () => {
   const [stats] = useState(mockDashboardStats);
   const [isLoading] = useState(false);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -27,8 +33,31 @@ const Dashboard = () => {
   const displayedEmployees = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return mockEmployees.slice(startIndex, endIndex);
-  }, [currentPage, pageSize]);
+    return allEmployees.slice(startIndex, endIndex);
+  }, [allEmployees, currentPage, pageSize]);
+
+  const handleDeleteClick = useCallback((employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!selectedEmployee) return;
+
+    setAllEmployees((prev) => prev.filter((e) => e.id !== selectedEmployee.id));
+
+    // If we deleted the last row on the current page, go back one page (when possible)
+    setCurrentPage((prevPage) => {
+      const nextTotal = allEmployees.length - 1;
+      const lastValidPage = Math.max(1, Math.ceil(nextTotal / pageSize));
+      return Math.min(prevPage, lastValidPage);
+    });
+  }, [allEmployees.length, pageSize, selectedEmployee]);
+
+  const handleEditClick = useCallback((employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsEditModalOpen(true);
+  }, []);
 
   const columns = useMemo<ColumnDef<Employee>[]>(() => {
     return [
@@ -41,14 +70,7 @@ const Dashboard = () => {
           </div>
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-              {getInitials(row.original.name)}
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-gray-900">{row.original.name}</div>
-            </div>
-          </div>
+          <div className="text-sm font-semibold text-gray-900">{row.original.name}</div>
         ),
       },
       {
@@ -64,19 +86,29 @@ const Dashboard = () => {
       {
         id: 'actions',
         header: () => <div className="w-full text-right">Actions</div>,
-        cell: () => (
+        cell: ({ row }) => (
           <div className="flex items-center justify-end gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900">
+            <button
+              type="button"
+              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-gray-900"
+              aria-label="Edit employee"
+              onClick={() => handleEditClick(row.original)}
+            >
               <Edit size={16} />
             </button>
-            <button className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600">
+            <button
+              type="button"
+              className="p-2 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600"
+              aria-label="Delete employee"
+              onClick={() => handleDeleteClick(row.original)}
+            >
               <Trash2 size={16} />
             </button>
           </div>
         ),
       },
     ];
-  }, []);
+  }, [handleDeleteClick, handleEditClick]);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -123,11 +155,39 @@ const Dashboard = () => {
         emptyText="No employees found"
         page={currentPage}
         pageSize={pageSize}
-        totalItems={mockEmployees.length}
+        totalItems={allEmployees.length}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
         pageSizeOptions={[5, 10, 20]}
         showControls={true}
+      />
+
+      <EditEmployeeDashboardModal
+        isOpen={isEditModalOpen}
+        employee={selectedEmployee}
+        onSave={(employeeId, updates) => {
+          setAllEmployees((prev) =>
+            prev.map((e) => (e.id === employeeId ? { ...e, ...updates } : e))
+          );
+        }}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+      />
+
+      <HrConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Employee"
+        message="Are you sure you want to delete"
+        itemName={selectedEmployee?.name}
+        confirmText="Delete"
+        type="danger"
       />
     </div>
   );
