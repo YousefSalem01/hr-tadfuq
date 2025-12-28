@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import HrChip from '../../uikit/HrChip/HrChip';
+import logo from '../../assets/logos/logo.svg';
 
 interface NavItem {
   icon: any;
@@ -28,7 +29,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   const navItems: NavItem[] = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Users, label: 'Employees', path: '/employees' },
     { icon: Calendar, label: 'Attendance', path: '/attendance' },
     { icon: FileText, label: 'Leaves', path: '/leaves' },
@@ -46,15 +47,11 @@ const Sidebar = () => {
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
           <div className={`flex items-center gap-3 ${collapsed ? 'justify-center w-full' : ''}`}>
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">V</span>
-            </div>
-            {!collapsed && (
-              <div>
-                <div className="text-sm font-semibold text-gray-800">Santalam Tax</div>
-                <div className="text-xs text-gray-500">Consultancy</div>
-              </div>
-            )}
+            <img 
+              src={logo} 
+              alt="Santalam Tax Consultancy" 
+              className={`${collapsed ? 'h-8' : 'h-10'}`} 
+            />
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}

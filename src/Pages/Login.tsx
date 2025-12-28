@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import logo from '../assets/logos/logo.svg';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Login = () => {
 
     try {
       // TODO: Implement login logic
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       setError(error.message || 'Login failed. Please try again.');
     } finally {
@@ -43,13 +44,7 @@ const Login = () => {
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">V</span>
-            </div>
-            <div className="text-left">
-              <div className="text-lg font-semibold text-gray-800">Santalam Tax</div>
-              <div className="text-sm text-gray-500">Consultancy</div>
-            </div>
+            <img src={logo} alt="Santalam Tax Consultancy" className="h-12" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-500">Sign in to your HR management account</p>

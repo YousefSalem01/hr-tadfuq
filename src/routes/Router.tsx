@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Header from '../components/Header/Header';
 import Login from '../Pages/Login';
@@ -19,6 +19,7 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/*" element={
         <div className="flex h-screen bg-gray-50">
           <Sidebar />
@@ -26,7 +27,7 @@ const AppRouter = () => {
             <Header />
             <main className="flex-1 overflow-y-auto p-6">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/leaves" element={<Leaves />} />
