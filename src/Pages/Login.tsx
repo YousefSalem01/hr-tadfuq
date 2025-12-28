@@ -152,7 +152,7 @@ const Login = () => {
 
         {/* Footer */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>© 2024 Santalam Tax Consultancy. All rights reserved.</p>
+          <p>© 2024 Specialist Tax Consultancy. All rights reserved.</p> 
         </div>
       </div>
     </div>
