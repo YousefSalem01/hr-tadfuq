@@ -8,6 +8,7 @@ export const useLogin = () => {
   const [error, setError] = useState<string>();
 
   const handleLogin = async (data: LoginFormData) => {
+    console.log(data);
     setError(undefined);
     setIsLoading(true);
 
