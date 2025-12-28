@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   Download, 
   Upload, 
   Search, 
   Filter, 
-  ChevronDown, 
   Users, 
   UserCheck, 
   AlertCircle,
@@ -13,10 +12,26 @@ import {
   Calendar
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { mockAttendanceChartData, mockAttendanceStats } from '../data/mock';
+import { ColumnDef } from '@tanstack/react-table';
+import { 
+  mockAttendanceChartData, 
+  mockAttendanceStats, 
+  departmentFilterOptions, 
+  attendanceStatusFilterOptions,
+  mockAttendanceRecords,
+  AttendanceRecord
+} from '../data/mock';
+import HrSelectMenu, { Option } from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
+import { getStatusBadgeColor } from '../utils';
 
 const Attendance = () => {
   const [selectedDate] = useState('Today');
+  const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(departmentFilterOptions[0]);
+  const [selectedStatus, setSelectedStatus] = useState<Option | null>(attendanceStatusFilterOptions[0]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
   const chartData = mockAttendanceChartData;
 
   const attendanceStats = [
@@ -26,6 +41,60 @@ const Attendance = () => {
     { label: 'Remote', value: mockAttendanceStats.remote.toString(), icon: <Laptop className="text-yellow-600" size={24} />, color: 'text-yellow-600' },
     { label: 'Absent', value: mockAttendanceStats.absent.toString(), icon: <UserX className="text-red-600" size={24} />, color: 'text-red-600' },
   ];
+
+  const columns = useMemo<ColumnDef<AttendanceRecord>[]>(
+    () => [
+      {
+        accessorKey: 'employee',
+        header: 'Employee',
+        cell: ({ getValue }) => (
+          <span className="font-medium text-gray-900">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'department',
+        header: 'Department',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{ getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'checkIn',
+        header: 'Check In',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'checkOut',
+        header: 'Check Out',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'hours',
+        header: 'Hours',
+        cell: ({ getValue }) => (
+          <span className="text-sm font-medium text-gray-900">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          return (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {status}
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -133,52 +202,37 @@ const Attendance = () => {
           <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
             <Filter size={20} className="text-gray-600" />
           </button>
-          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>All Departments</option>
-            <option>Engineering</option>
-            <option>Marketing</option>
-            <option>Sales</option>
-            <option>HR</option>
-          </select>
-          <select className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option>All Statuses</option>
-            <option>Present</option>
-            <option>Late</option>
-            <option>Remote</option>
-            <option>Absent</option>
-          </select>
+          <div className="w-48">
+            <HrSelectMenu
+              name="department"
+              options={departmentFilterOptions}
+              value={selectedDepartment}
+              onChange={(value) => setSelectedDepartment(value as Option | null)}
+              isSearchable={false}
+            />
+          </div>
+          <div className="w-44">
+            <HrSelectMenu
+              name="status"
+              options={attendanceStatusFilterOptions}
+              value={selectedStatus}
+              onChange={(value) => setSelectedStatus(value as Option | null)}
+              isSearchable={false}
+            />
+          </div>
         </div>
       </div>
 
       {/* Attendance Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Company</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Department</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Check In</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Check Out</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Hours</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan={6} className="py-12 text-center">
-                  <div className="text-gray-400 text-sm">No data available</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <HrTable
+        columns={columns}
+        data={mockAttendanceRecords}
+        page={page}
+        pageSize={pageSize}
+        totalItems={mockAttendanceRecords.length}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 };

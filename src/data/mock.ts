@@ -94,6 +94,22 @@ export const statusOptions: SelectOption[] = [
   { value: 'On Leave', label: 'On Leave' },
 ];
 
+export const attendanceStatusFilterOptions: SelectOption[] = [
+  { value: '', label: 'All Statuses' },
+  { value: 'Present', label: 'Present' },
+  { value: 'Late', label: 'Late' },
+  { value: 'Remote', label: 'Remote' },
+  { value: 'Absent', label: 'Absent' },
+];
+
+export const departmentFilterOptions: SelectOption[] = [
+  { value: '', label: 'All Departments' },
+  { value: 'Engineering', label: 'Engineering' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Sales', label: 'Sales' },
+  { value: 'HR', label: 'HR' },
+];
+
 export const employeeOptions: SelectOption[] = [
   { value: 'Olivia Rhye', label: 'Olivia Rhye' },
   { value: 'Phoenix Baker', label: 'Phoenix Baker' },
@@ -391,6 +407,86 @@ export const mockPayrollRecords: PayrollRecord[] = [
     netPay: 5400,
     status: 'Active',
   },
+  {
+    id: 5,
+    employeeName: 'Candice Wu',
+    month: '2024-01',
+    basicSalary: 4800,
+    allowances: 200,
+    deductions: 100,
+    netPay: 4900,
+    status: 'On Leave',
+  },
+  {
+    id: 6,
+    employeeName: 'Natali Craig',
+    month: '2024-01',
+    basicSalary: 4900,
+    allowances: 100,
+    deductions: 50,
+    netPay: 4850,
+    status: 'Active',
+  },
+  {
+    id: 7,
+    employeeName: 'Drew Cano',
+    month: '2024-01',
+    basicSalary: 5000,
+    allowances: 150,
+    deductions: 75,
+    netPay: 5125,
+    status: 'Inactive',
+  },
+  {
+    id: 8,
+    employeeName: 'Orlando Diggs',
+    month: '2024-01',
+    basicSalary: 5100,
+    allowances: 175,
+    deductions: 85,
+    netPay: 5230,
+    status: 'Active',
+  },
+  {
+    id: 9,
+    employeeName: 'Andi Lane',
+    month: '2024-01',
+    basicSalary: 5200,
+    allowances: 200,
+    deductions: 95,
+    netPay: 5310,
+    status: 'Inactive',
+  },
+  {
+    id: 10,
+    employeeName: 'Kate Morrison',
+    month: '2024-01',
+    basicSalary: 5300,
+    allowances: 225,
+    deductions: 105,
+    netPay: 5420,
+    status: 'Active',
+  },
+  {
+    id: 11,
+    employeeName: 'Jasper Lee',
+    month: '2024-01',
+    basicSalary: 5400,
+    allowances: 250,
+    deductions: 125,
+    netPay: 5550,
+    status: 'Active',
+  },
+  {
+    id: 12,
+    employeeName: 'Sienna Faye',
+    month: '2024-01',
+    basicSalary: 5500,
+    allowances: 275,
+    deductions: 145,
+    netPay: 5675,
+    status: 'Active',
+  },
 ];
 
 // ============================================================================
@@ -634,6 +730,109 @@ export const mockAttendanceStats = {
   remote: 0,
   absent: 0,
 };
+
+export interface AttendanceRecord {
+  id: number;
+  employee: string;
+  department: string;
+  checkIn: string;
+  checkOut: string;
+  hours: string;
+  status: 'Present' | 'Late' | 'Remote' | 'Absent';
+}
+
+export const mockAttendanceRecords: AttendanceRecord[] = [
+  {
+    id: 1,
+    employee: 'Olivia Rhye',
+    department: 'Engineering',
+    checkIn: '09:00 AM',
+    checkOut: '05:30 PM',
+    hours: '8.5h',
+    status: 'Present',
+  },
+  {
+    id: 2,
+    employee: 'Phoenix Baker',
+    department: 'Engineering',
+    checkIn: '09:15 AM',
+    checkOut: '05:45 PM',
+    hours: '8.5h',
+    status: 'Late',
+  },
+  {
+    id: 3,
+    employee: 'Lana Steiner',
+    department: 'Human Resources',
+    checkIn: '08:45 AM',
+    checkOut: '05:00 PM',
+    hours: '8.25h',
+    status: 'Present',
+  },
+  {
+    id: 4,
+    employee: 'Demi Wilkinson',
+    department: 'Marketing',
+    checkIn: '-',
+    checkOut: '-',
+    hours: '-',
+    status: 'Absent',
+  },
+  {
+    id: 5,
+    employee: 'Candice Wu',
+    department: 'Sales',
+    checkIn: '10:00 AM',
+    checkOut: '06:00 PM',
+    hours: '8h',
+    status: 'Remote',
+  },
+  {
+    id: 6,
+    employee: 'Natali Craig',
+    department: 'Engineering',
+    checkIn: '09:05 AM',
+    checkOut: '05:30 PM',
+    hours: '8.42h',
+    status: 'Present',
+  },
+  {
+    id: 7,
+    employee: 'Drew Cano',
+    department: 'Sales',
+    checkIn: '09:30 AM',
+    checkOut: '05:45 PM',
+    hours: '8.25h',
+    status: 'Late',
+  },
+  {
+    id: 8,
+    employee: 'Orlando Diggs',
+    department: 'Marketing',
+    checkIn: '08:50 AM',
+    checkOut: '05:15 PM',
+    hours: '8.42h',
+    status: 'Present',
+  },
+  {
+    id: 9,
+    employee: 'Andi Lane',
+    department: 'Human Resources',
+    checkIn: '09:00 AM',
+    checkOut: '05:30 PM',
+    hours: '8.5h',
+    status: 'Present',
+  },
+  {
+    id: 10,
+    employee: 'Kate Morrison',
+    department: 'Sales',
+    checkIn: '10:30 AM',
+    checkOut: '06:30 PM',
+    hours: '8h',
+    status: 'Remote',
+  },
+];
 
 // ============================================================================
 // DASHBOARD

@@ -1,35 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Download, 
   Search, 
   Filter, 
-  ChevronDown, 
   DollarSign,
   UserCheck,
   UserMinus,
   Users,
-  ChevronLeft,
-  ChevronRight,
   Plus
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import CreatePayrollModal from '../uikit/CreatePayrollModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
 import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
 import { mockPayrollRecords, mockEmployees, PayrollRecord, payrollMonthOptions, SelectOption } from '../data/mock';
 import { SingleValue } from 'react-select';
+import { getStatusBadgeColor, formatStatus, formatCurrency } from '../utils';
 
 const Payroll = () => {
   const [allPayrollRecords, setAllPayrollRecords] = useState<PayrollRecord[]>(mockPayrollRecords);
   const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [filteredRecordsCount, setFilteredRecordsCount] = useState(mockPayrollRecords.length);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [employees] = useState(mockEmployees);
-  const itemsPerPage = 10;
 
   useEffect(() => {
     // Filter payroll records based on search term and month
@@ -45,14 +45,14 @@ const Payroll = () => {
       filtered = filtered.filter(record => record.month === selectedMonth);
     }
 
-    // Pagination
-    const totalPagesCalc = Math.ceil(filtered.length / itemsPerPage);
-    setTotalPages(totalPagesCalc);
+    // Update filtered count
+    setFilteredRecordsCount(filtered.length);
     
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    // Pagination
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
     setPayrollRecords(filtered.slice(startIndex, endIndex));
-  }, [searchTerm, selectedMonth, currentPage, allPayrollRecords]);
+  }, [searchTerm, selectedMonth, currentPage, allPayrollRecords, pageSize]);
 
   const handleCreatePayroll = (data: any) => {
     const employee = employees.find(emp => emp.name === data.employeeName);
@@ -78,49 +78,71 @@ const Payroll = () => {
     setIsModalOpen(false);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-500';
-      case 'On Leave':
-        return 'bg-orange-500';
-      case 'Inactive':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'text-green-700';
-      case 'On Leave':
-        return 'text-orange-700';
-      case 'Inactive':
-        return 'text-red-700';
-      default:
-        return 'text-gray-700';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const columns = useMemo<ColumnDef<PayrollRecord>[]>(
+    () => [
+      {
+        accessorKey: 'employeeName',
+        header: 'Employees',
+        cell: ({ row }) => (
+          <span className="font-medium text-gray-900">{row.original.employeeName || row.original.employee_name}</span>
+        ),
+      },
+      {
+        accessorKey: 'month',
+        header: 'Month',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'basicSalary',
+        header: 'Basic Salary',
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(row.original.basicSalary || row.original.basic_salary || 0)}</span>
+        ),
+      },
+      {
+        accessorKey: 'allowances',
+        header: 'Allowances',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(getValue() as number)}</span>
+        ),
+      },
+      {
+        accessorKey: 'deductions',
+        header: 'Deductions',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(getValue() as number)}</span>
+        ),
+      },
+      {
+        accessorKey: 'netPay',
+        header: 'Net Pay',
+        cell: ({ row }) => (
+          <span className="text-sm font-semibold text-gray-900">{formatCurrency(row.original.netPay || row.original.net_pay || 0)}</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          return (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {formatStatus(status)}
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
 
 
   return (
@@ -205,115 +227,17 @@ const Payroll = () => {
       </div>
 
       {/* Payroll Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Employees</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Month</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Basic Salary</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Allowances</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Deductions</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Net Pay</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-500">Loading payroll records...</td>
-                </tr>
-              ) : payrollRecords.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-500">No payroll records found</td>
-                </tr>
-              ) : (
-                payrollRecords.map((record) => (
-                <tr key={record.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                        {getInitials(record.employeeName || record.employee_name || '')}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{record.employeeName || record.employee_name}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.month}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.basicSalary || record.basic_salary || 0)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.allowances)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.deductions)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm font-semibold text-gray-900">{formatCurrency(record.netPay || record.net_pay || 0)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`}></div>
-                      <span className={`text-sm font-medium ${getStatusTextColor(record.status)}`}>
-                        {record.status}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              )))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <HrButton
-            variant="secondary"
-            icon={ChevronLeft}
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </HrButton>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-              if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                return (
-                  <HrButton
-                    key={page}
-                    variant={currentPage === page ? 'primary' : 'ghost'}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </HrButton>
-                );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
-                return <span key={page} className="text-gray-500">...</span>;
-              }
-              return null;
-            })}
-          </div>
-          <HrButton
-            variant="secondary"
-            icon={ChevronRight}
-            iconPosition="right"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </HrButton>
-        </div>
-      </div>
+      <HrTable
+        columns={columns}
+        data={payrollRecords}
+        isLoading={isLoading}
+        emptyText="No payroll records found"
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredRecordsCount}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       {/* Create Payroll Modal */}
       <CreatePayrollModal

@@ -1,35 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Download, 
   Search, 
   Filter, 
-  ChevronDown, 
   Files,
   FileText,
   AlertCircle,
   FileX,
-  Plus,
-  ChevronLeft,
-  ChevronRight
+  Plus
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import AddDocumentsModal from '../uikit/AddDocumentsModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
 import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
 import { mockDocuments, DocumentRecord, documentStatusOptions, SelectOption } from '../data/mock';
 import { SingleValue } from 'react-select';
+import { getStatusBadgeColor, formatStatus } from '../utils';
 
 const Documents = () => {
-  const [documentRecords, setDocumentRecords] = useState<DocumentRecord[]>(mockDocuments);
+  const [allDocumentRecords, setAllDocumentRecords] = useState<DocumentRecord[]>(mockDocuments);
+  const [documentRecords, setDocumentRecords] = useState<DocumentRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [filteredRecordsCount, setFilteredRecordsCount] = useState(mockDocuments.length);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDocType, setSelectedDocType] = useState('type');
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(documentRecords.length / itemsPerPage);
+  const [isLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDocType, setSelectedDocType] = useState('');
+
+  useEffect(() => {
+    // Filter document records based on search term and document type
+    let filtered = allDocumentRecords;
+
+    if (searchTerm) {
+      filtered = filtered.filter(record =>
+        record.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.documentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.issuer.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedDocType) {
+      filtered = filtered.filter(record => record.status === selectedDocType);
+    }
+
+    // Update filtered count
+    setFilteredRecordsCount(filtered.length);
+    
+    // Pagination
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setDocumentRecords(filtered.slice(startIndex, endIndex));
+  }, [searchTerm, selectedDocType, currentPage, allDocumentRecords, pageSize]);
 
   const handleAddDocument = (data: any) => {
     const newDocument: DocumentRecord = {
-      id: documentRecords.length + 1,
+      id: allDocumentRecords.length + 1,
       employeeName: data.employeeName,
       documentType: data.documentType,
       issuer: data.issuer,
@@ -37,52 +65,68 @@ const Documents = () => {
       expiryDate: data.expiryDate,
       status: 'Pending',
     };
-    setDocumentRecords([...documentRecords, newDocument]);
+    setAllDocumentRecords([...allDocumentRecords, newDocument]);
     setIsModalOpen(false);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-500';
-      case 'Pending':
-        return 'bg-orange-500';
-      case 'Hold':
-        return 'bg-gray-500';
-      case 'Expired':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'text-green-700';
-      case 'Pending':
-        return 'text-orange-700';
-      case 'Hold':
-        return 'text-gray-700';
-      case 'Expired':
-        return 'text-red-700';
-      default:
-        return 'text-gray-700';
-    }
-  };
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentRecords = documentRecords.slice(startIndex, endIndex);
+  const columns = useMemo<ColumnDef<DocumentRecord>[]>(
+    () => [
+      {
+        accessorKey: 'employeeName',
+        header: 'Employees',
+        cell: ({ getValue }) => (
+          <span className="font-medium text-gray-900">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'documentType',
+        header: 'Document Type',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'issuer',
+        header: 'Issuer',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'issueDate',
+        header: 'Issue Date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'expiryDate',
+        header: 'Expiry Date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          return (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {formatStatus(status)}
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -141,6 +185,11 @@ const Documents = () => {
             <input
               type="text"
               placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
@@ -148,11 +197,12 @@ const Documents = () => {
           <HrSelectMenu
             name="documentTypeFilter"
             placeholder="Select Type"
-            options={documentStatusOptions}
+            options={[{ value: '', label: 'All Types' }, ...documentStatusOptions]}
             value={documentStatusOptions.find(option => option.value === selectedDocType) || null}
             onChange={(option) => {
               const selected = option as SingleValue<SelectOption>;
-              setSelectedDocType(selected ? selected.value : 'type');
+              setSelectedDocType(selected ? selected.value : '');
+              setCurrentPage(1);
             }}
             isSearchable={false}
           />
@@ -163,102 +213,17 @@ const Documents = () => {
       </div>
 
       {/* Documents Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Employees</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Document Type</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Issuer</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Issue Date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Expiry Date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRecords.map((record) => (
-                <tr key={record.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                        {getInitials(record.employeeName)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{record.employeeName}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.documentType}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.issuer}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.issueDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.expiryDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`}></div>
-                      <span className={`text-sm font-medium ${getStatusTextColor(record.status)}`}>
-                        {record.status}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <HrButton
-            variant="secondary"
-            icon={ChevronLeft}
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </HrButton>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-              if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                return (
-                  <HrButton
-                    key={page}
-                    variant={currentPage === page ? 'primary' : 'ghost'}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </HrButton>
-                );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
-                return <span key={page} className="text-gray-500">...</span>;
-              }
-              return null;
-            })}
-          </div>
-          <HrButton
-            variant="secondary"
-            icon={ChevronRight}
-            iconPosition="right"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </HrButton>
-        </div>
-      </div>
+      <HrTable
+        columns={columns}
+        data={documentRecords}
+        isLoading={isLoading}
+        emptyText="No document records found"
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredRecordsCount}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       {/* Add Documents Modal */}
       <AddDocumentsModal

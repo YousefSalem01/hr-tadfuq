@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   Plus, 
   Search, 
   Filter, 
-  ChevronDown, 
   Calendar,
   Clock,
   CheckCircle,
@@ -11,18 +10,23 @@ import {
   Trash2,
   Edit
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import LeaveRequestModal from '../uikit/LeaveRequestModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
 import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
 import { mockLeaves, Leave, leaveTypeOptions } from '../data/mock';
+import { getStatusBadgeColor, formatStatus } from '../utils';
 
 const Leaves = () => {
   const [leaves, setLeaves] = useState<Leave[]>(mockLeaves);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSubmitLeaveRequest = (data: any) => {
     const newLeave: Leave = {
@@ -51,46 +55,76 @@ const Leaves = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  // Paginate data locally (mock backend pagination)
+  const paginatedLeaves = useMemo(() => {
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return leaves.slice(startIndex, endIndex);
+  }, [leaves, page, pageSize]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Approved':
-      case 'Active':
-        return 'bg-green-500';
-      case 'pending':
-        return 'bg-orange-500';
-      case 'Rejected':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Approved':
-      case 'Active':
-        return 'text-green-700';
-      case 'pending':
-        return 'text-orange-700';
-      case 'Rejected':
-        return 'text-red-700';
-      default:
-        return 'text-gray-700';
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
+  const columns = useMemo<ColumnDef<Leave>[]>(
+    () => [
+      {
+        accessorKey: 'employeeName',
+        header: 'Company',
+        cell: ({ getValue }) => (
+          <span className="font-medium text-gray-900">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'leaveType',
+        header: 'Leave type',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'startDate',
+        header: 'Start date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'endDate',
+        header: 'End date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'days',
+        header: 'Days',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string} Days</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          return (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {formatStatus(status)}
+            </span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        header: '',
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-2">
+            <HrButton variant="icon" icon={Edit} />
+            <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteClick(row.original)} className="p-2" />
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -175,70 +209,15 @@ const Leaves = () => {
       </div>
 
       {/* Leaves Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Company</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Leave type</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Start date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">End date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Days</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-                <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaves.map((leave) => (
-                <tr key={leave.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                        {getInitials(leave.employeeName)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{leave.employeeName}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{leave.leaveType}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{leave.startDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{leave.endDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{leave.days} Days</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(leave.status)}`}></div>
-                      <span className={`text-sm font-medium ${getStatusTextColor(leave.status)}`}>
-                        {formatStatus(leave.status)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-end gap-2">
-                      <HrButton variant="icon" icon={Edit} />
-                      <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteClick(leave)} className="p-2" />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <HrTable
+        columns={columns}
+        data={paginatedLeaves}
+        page={page}
+        pageSize={pageSize}
+        totalItems={leaves.length}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {/* Leave Request Modal */}
       <LeaveRequestModal

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { 
   Download, 
   Upload, 
   Plus, 
-  Search, 
+  Search,
   Filter, 
   ChevronDown, 
   Users, 
@@ -13,20 +14,21 @@ import {
   Trash2,
   Edit,
   HelpCircle,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-react';
 import AddEmployeeModal from '../uikit/AddEmployeeModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrConfirmationModal from '../uikit/HrConfirmationModal/HrConfirmationModal';
 import HrSelectMenu, { Option } from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
+import HrInput from '../uikit/HrInput/HrInput';
 import { mockEmployees, Employee, departmentOptions, statusOptions } from '../data/mock';
+import { getInitials, getStatusBadgeColor } from '../utils';
 
 const Employees = () => {
   const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [filteredEmployeesCount, setFilteredEmployeesCount] = useState(mockEmployees.length);
   const [totalEmployees, setTotalEmployees] = useState(mockEmployees.length);
   const [activeEmployees, setActiveEmployees] = useState(mockEmployees.filter(e => e.status === 'Active').length);
   const [onLeaveEmployees, setOnLeaveEmployees] = useState(mockEmployees.filter(e => e.status === 'On Leave').length);
@@ -38,7 +40,7 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<Option | null>(null);
-  const itemsPerPage = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     // Filter employees based on search term, department, and status
@@ -52,11 +54,11 @@ const Employees = () => {
       );
     }
 
-    if (selectedDepartment) {
+    if (selectedDepartment?.value) {
       filtered = filtered.filter(emp => emp.department === selectedDepartment.value);
     }
 
-    if (selectedStatus) {
+    if (selectedStatus?.value) {
       filtered = filtered.filter(emp => emp.status === selectedStatus.value);
     }
 
@@ -66,14 +68,13 @@ const Employees = () => {
     setOnLeaveEmployees(allEmployees.filter(e => e.status === 'On Leave').length);
     setInactiveEmployees(allEmployees.filter(e => e.status === 'Inactive').length);
 
-    // Pagination
-    const totalPagesCalc = Math.ceil(filtered.length / itemsPerPage);
-    setTotalPages(totalPagesCalc);
+    // Pagination (mock backend for now)
+    setFilteredEmployeesCount(filtered.length);
     
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
     setEmployees(filtered.slice(startIndex, endIndex));
-  }, [searchTerm, selectedDepartment, selectedStatus, currentPage, allEmployees]);
+  }, [searchTerm, selectedDepartment, selectedStatus, currentPage, allEmployees, pageSize]);
 
   const handleAddEmployee = (employeeData: any) => {
     const newEmployee: Employee = {
@@ -109,55 +110,101 @@ const Employees = () => {
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
     setCurrentPage(1); // Reset to first page on search
   };
 
   const handleDepartmentFilter = (option: Option | readonly Option[] | null) => {
-    setSelectedDepartment(Array.isArray(option) ? null : (option as Option | null));
+    const next = Array.isArray(option) ? null : (option as Option | null);
+    setSelectedDepartment(next?.value ? next : null);
     setCurrentPage(1);
   };
 
   const handleStatusFilter = (option: Option | readonly Option[] | null) => {
-    setSelectedStatus(Array.isArray(option) ? null : (option as Option | null));
+    const next = Array.isArray(option) ? null : (option as Option | null);
+    setSelectedStatus(next?.value ? next : null);
     setCurrentPage(1);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-500';
-      case 'On Leave':
-        return 'bg-orange-500';
-      case 'Inactive':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'text-green-700';
-      case 'On Leave':
-        return 'text-orange-700';
-      case 'Inactive':
-        return 'text-red-700';
-      default:
-        return 'text-gray-700';
-    }
-  };
+  const columns = useMemo<ColumnDef<Employee>[]>(() => {
+    return [
+      {
+        accessorKey: 'name',
+        header: () => (
+          <div className="flex items-center gap-1">
+            Employees
+            <HelpCircle size={14} className="text-gray-400" />
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+              {getInitials(row.original.name)}
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900">{row.original.name}</div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'role',
+        header: () => (
+          <div className="flex items-center gap-1">
+            Role
+            <HelpCircle size={14} className="text-gray-400" />
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.role}</div>,
+      },
+      {
+        accessorKey: 'department',
+        header: 'Department',
+        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.department}</div>,
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.email}</div>,
+      },
+      {
+        accessorKey: 'status',
+        header: () => (
+          <div className="flex items-center gap-1">
+            Status
+            <ChevronDown size={14} className="text-gray-400" />
+          </div>
+        ),
+        cell: ({ row }) => (
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(row.original.status)}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+            {row.original.status}
+          </span>
+        ),
+      },
+      {
+        id: 'actions',
+        header: () => <div className="w-full text-right" />,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-2">
+            <HrButton variant="icon" icon={Edit} />
+            <HrButton
+              variant="icon"
+              icon={Trash2}
+              onClick={() => handleDeleteClick(row.original)}
+              className="hover:bg-red-50 hover:text-red-600"
+            />
+          </div>
+        ),
+      },
+    ];
+  }, []);
 
 
   return (
@@ -232,14 +279,15 @@ const Employees = () => {
       {/* Filters and Search */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search employees..."
+          <div className="flex-1">
+            <HrInput
+              variant="text"
+              name="employeeSearch"
               value={searchTerm}
-              onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              onChange={(e) => handleSearchChange((e.target as HTMLInputElement).value)}
+              placeholder="Search employees..."
+              icon={Search}
+              iconPosition="left"
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
@@ -267,132 +315,17 @@ const Employees = () => {
       </div>
 
       {/* Employees Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Employees
-                    <HelpCircle size={14} className="text-gray-400" />
-                  </div>
-                </th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Role
-                    <HelpCircle size={14} className="text-gray-400" />
-                  </div>
-                </th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Department</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Email</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-                <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
-                    Loading employees...
-                  </td>
-                </tr>
-              ) : employees.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
-                    No employees found
-                  </td>
-                </tr>
-              ) : (
-                employees.map((employee) => (
-                <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                        {getInitials(employee.name)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{employee.name}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{employee.role}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{employee.department}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{employee.email}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(employee.status)}`}></div>
-                      <span className={`text-sm font-medium ${getStatusTextColor(employee.status)}`}>
-                        {employee.status}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-end gap-2">
-                      <HrButton variant="icon" icon={Edit} />
-                      <HrButton variant="danger" icon={Trash2} onClick={() => handleDeleteClick(employee)} className="p-2" />
-                    </div>
-                  </td>
-                </tr>
-              )))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <HrButton
-            variant="secondary"
-            icon={ChevronLeft}
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </HrButton>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-              if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                      currentPage === page
-                        ? 'bg-primary text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
-                return <span key={page} className="text-gray-500">...</span>;
-              }
-              return null;
-            })}
-          </div>
-          <HrButton
-            variant="secondary"
-            icon={ChevronRight}
-            iconPosition="right"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </HrButton>
-        </div>
-      </div>
+      <HrTable<Employee>
+        columns={columns}
+        data={employees}
+        isLoading={isLoading}
+        emptyText="No employees found"
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredEmployeesCount}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       {/* Add Employee Modal */}
       <AddEmployeeModal

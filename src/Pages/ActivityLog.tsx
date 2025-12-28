@@ -1,99 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   Filter, 
-  ChevronDown,
-  UserPlus,
-  Edit,
-  Trash2,
-  FileText,
-  Calendar,
-  Clock,
-  User
+  Calendar
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
 import { mockActivityLogs, ActivityLog as ActivityLogType, actionFilterOptions, entityFilterOptions, SelectOption } from '../data/mock';
 import { SingleValue } from 'react-select';
+import { getActionIcon, getActionBadgeColor, formatTimestamp } from '../utils';
 
 const ActivityLog = () => {
   const [activityLogs] = useState<ActivityLogType[]>(mockActivityLogs);
-  const [filteredLogs, setFilteredLogs] = useState(mockActivityLogs);
+  const [filteredLogs, setFilteredLogs] = useState<ActivityLogType[]>(mockActivityLogs);
+  const [paginatedLogs, setPaginatedLogs] = useState<ActivityLogType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('All');
   const [entityFilter, setEntityFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [isLoading] = useState(false);
 
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case 'Created':
-        return <UserPlus className="text-green-600" size={18} />;
-      case 'Updated':
-        return <Edit className="text-blue-600" size={18} />;
-      case 'Deleted':
-        return <Trash2 className="text-red-600" size={18} />;
-      case 'Permission Changed':
-        return <User className="text-purple-600" size={18} />;
-      case 'Logged In':
-        return <Clock className="text-green-600" size={18} />;
-      case 'Logged Out':
-        return <Clock className="text-gray-600" size={18} />;
-      default:
-        return <FileText className="text-gray-600" size={18} />;
-    }
-  };
-
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case 'Created':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'Updated':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Deleted':
-        return 'bg-red-50 text-red-700 border-red-200';
-      case 'Permission Changed':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'Logged In':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'Logged Out':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  useEffect(() => {
+    // Pagination for filtered logs
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setPaginatedLogs(filteredLogs.slice(startIndex, endIndex));
+  }, [filteredLogs, currentPage, pageSize]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
+    setCurrentPage(1);
     filterLogs(value, actionFilter, entityFilter);
   };
 
@@ -122,13 +61,84 @@ const ActivityLog = () => {
 
   const handleActionFilter = (value: string) => {
     setActionFilter(value);
+    setCurrentPage(1);
     filterLogs(searchTerm, value, entityFilter);
   };
 
   const handleEntityFilter = (value: string) => {
     setEntityFilter(value);
+    setCurrentPage(1);
     filterLogs(searchTerm, actionFilter, value);
   };
+
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
+  };
+
+  const columns = useMemo<ColumnDef<ActivityLogType>[]>(
+    () => [
+      {
+        accessorKey: 'action',
+        header: 'Action',
+        cell: ({ getValue }) => {
+          const action = getValue() as string;
+          return (
+            <div className="flex items-center gap-2">
+              {getActionIcon(action)}
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getActionBadgeColor(action)}`}>
+                {action}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'entity',
+        header: 'Entity',
+        cell: ({ row }) => (
+          <div>
+            <div className="text-sm font-semibold text-gray-900">{row.original.entity}</div>
+            <div className="text-xs text-gray-500">{row.original.entityName}</div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'details',
+        header: 'Details',
+        cell: ({ getValue }) => (
+          <div className="text-sm text-gray-700 max-w-md">{(getValue() as string) || '-'}</div>
+        ),
+      },
+      {
+        accessorKey: 'user',
+        header: 'User',
+        cell: ({ row }) => (
+          <div>
+            <div className="text-sm font-semibold text-gray-900">{row.original.user}</div>
+            <div className="text-xs text-gray-500">{row.original.userEmail}</div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'timestamp',
+        header: 'Timestamp',
+        cell: ({ getValue }) => {
+          const timestamp = getValue() as string;
+          return (
+            <div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar size={14} className="text-gray-400" />
+                <span>{formatTimestamp(timestamp)}</span>
+              </div>
+              <div className="text-xs text-gray-400 mt-1">{timestamp}</div>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -180,74 +190,17 @@ const ActivityLog = () => {
       </div>
 
       {/* Activity Log Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Action</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Entity</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Details</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">User</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Timestamp
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      {getActionIcon(log.action)}
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getActionColor(log.action)}`}>
-                        {log.action}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900">{log.entity}</div>
-                      <div className="text-xs text-gray-500">{log.entityName}</div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700 max-w-md">{log.details || '-'}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-semibold text-gray-700">
-                        {getInitials(log.user)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{log.user}</div>
-                        <div className="text-xs text-gray-500">{log.userEmail}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar size={14} className="text-gray-400" />
-                      <span>{formatTimestamp(log.timestamp)}</span>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">{log.timestamp}</div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {filteredLogs.length === 0 && (
-        <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-          <FileText className="mx-auto text-gray-400 mb-4" size={48} />
-          <p className="text-gray-500">No activities found matching your filters</p>
-        </div>
-      )}
+      <HrTable
+        columns={columns}
+        data={paginatedLogs}
+        isLoading={isLoading}
+        emptyText="No activities found matching your filters"
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredLogs.length}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </div>
   );
 };

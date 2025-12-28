@@ -1,35 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Download, 
   Search, 
   Filter, 
-  ChevronDown, 
   FileMinus,
   DollarSign,
   FileUp,
   FileDown,
-  Plus,
-  ChevronLeft,
-  ChevronRight
+  Plus
 } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import AddAdvanceModal from '../uikit/AddAdvanceModal';
 import HrButton from '../uikit/HrButton/HrButton';
 import HrCard from '../uikit/HrCard/HrCard';
 import HrSelectMenu from '../uikit/HrSelectMenu/HrSelectMenu';
+import HrTable from '../uikit/HrTable/HrTable';
+import HrInput from '../uikit/HrInput/HrInput';
 import { mockAdvanceRecords, AdvanceRecord, advanceStatusOptions, SelectOption } from '../data/mock';
 import { SingleValue } from 'react-select';
+import { getStatusBadgeColor, formatStatus, formatCurrency } from '../utils';
 
 const Advance = () => {
-  const [advanceRecords, setAdvanceRecords] = useState<AdvanceRecord[]>(mockAdvanceRecords);
+  const [allAdvanceRecords, setAllAdvanceRecords] = useState<AdvanceRecord[]>(mockAdvanceRecords);
+  const [advanceRecords, setAdvanceRecords] = useState<AdvanceRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [filteredRecordsCount, setFilteredRecordsCount] = useState(mockAdvanceRecords.length);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState('Completed');
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(advanceRecords.length / itemsPerPage);
+  const [isLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+
+  useEffect(() => {
+    // Filter advance records based on search term and status
+    let filtered = allAdvanceRecords;
+
+    if (searchTerm) {
+      filtered = filtered.filter(record =>
+        record.employeeName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedStatus) {
+      filtered = filtered.filter(record => record.status === selectedStatus);
+    }
+
+    // Update filtered count
+    setFilteredRecordsCount(filtered.length);
+    
+    // Pagination
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setAdvanceRecords(filtered.slice(startIndex, endIndex));
+  }, [searchTerm, selectedStatus, currentPage, allAdvanceRecords, pageSize]);
 
   const handleAddAdvance = (data: any) => {
     const newAdvance: AdvanceRecord = {
-      id: advanceRecords.length + 1,
+      id: allAdvanceRecords.length + 1,
       employeeName: data.employeeName,
       amount: data.amount,
       monthlyDeduction: data.monthlyDeduction,
@@ -38,57 +65,75 @@ const Advance = () => {
       endDate: data.endDate,
       status: 'Pending',
     };
-    setAdvanceRecords([...advanceRecords, newAdvance]);
+    setAllAdvanceRecords([...allAdvanceRecords, newAdvance]);
     setIsModalOpen(false);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-500';
-      case 'Pending':
-        return 'bg-orange-500';
-      case 'Hold':
-        return 'bg-gray-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'text-green-700';
-      case 'Pending':
-        return 'text-orange-700';
-      case 'Hold':
-        return 'text-gray-700';
-      default:
-        return 'text-gray-700';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentRecords = advanceRecords.slice(startIndex, endIndex);
+  const columns = useMemo<ColumnDef<AdvanceRecord>[]>(
+    () => [
+      {
+        accessorKey: 'employeeName',
+        header: 'Employees',
+        cell: ({ getValue }) => (
+          <span className="font-medium text-gray-900">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'amount',
+        header: 'Amount',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(getValue() as number)}</span>
+        ),
+      },
+      {
+        accessorKey: 'monthlyDeduction',
+        header: 'Monthly Deduction',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(getValue() as number)}</span>
+        ),
+      },
+      {
+        accessorKey: 'remaining',
+        header: 'Remaining',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{formatCurrency(getValue() as number)}</span>
+        ),
+      },
+      {
+        accessorKey: 'startDate',
+        header: 'Start Date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'endDate',
+        header: 'End Date',
+        cell: ({ getValue }) => (
+          <span className="text-sm text-gray-700">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          return (
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+              {formatStatus(status)}
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -142,23 +187,30 @@ const Advance = () => {
       {/* Filters and Search */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
+          <div className="flex-1">
+            <HrInput
+              variant="text"
+              name="advanceSearch"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm((e.target as HTMLInputElement).value);
+                setCurrentPage(1);
+              }}
               placeholder="Search employees..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              icon={Search}
+              iconPosition="left"
             />
           </div>
           <HrButton variant="icon" icon={Filter} />
           <HrSelectMenu
             name="statusFilter"
             placeholder="Select Status"
-            options={advanceStatusOptions}
+            options={[{ value: '', label: 'All Statuses' }, ...advanceStatusOptions]}
             value={advanceStatusOptions.find(option => option.value === selectedStatus) || null}
             onChange={(option) => {
               const selected = option as SingleValue<SelectOption>;
-              setSelectedStatus(selected ? selected.value : 'Completed');
+              setSelectedStatus(selected ? selected.value : '');
+              setCurrentPage(1);
             }}
             isSearchable={false}
           />
@@ -169,106 +221,17 @@ const Advance = () => {
       </div>
 
       {/* Advances Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Employees</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Amount</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Monthly Deduction</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Remaining</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Start Date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">End Date</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">
-                  <div className="flex items-center gap-1">
-                    Status
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRecords.map((record) => (
-                <tr key={record.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                        {getInitials(record.employeeName)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{record.employeeName}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.amount)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.monthlyDeduction)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{formatCurrency(record.remaining)}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.startDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-700">{record.endDate}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(record.status)}`}></div>
-                      <span className={`text-sm font-medium ${getStatusTextColor(record.status)}`}>
-                        {record.status}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <HrButton
-            variant="secondary"
-            icon={ChevronLeft}
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </HrButton>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-              if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                return (
-                  <HrButton
-                    key={page}
-                    variant={currentPage === page ? 'primary' : 'ghost'}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </HrButton>
-                );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
-                return <span key={page} className="text-gray-500">...</span>;
-              }
-              return null;
-            })}
-          </div>
-          <HrButton
-            variant="secondary"
-            icon={ChevronRight}
-            iconPosition="right"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </HrButton>
-        </div>
-      </div>
+      <HrTable
+        columns={columns}
+        data={advanceRecords}
+        isLoading={isLoading}
+        emptyText="No advance records found"
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredRecordsCount}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       {/* Add Advance Modal */}
       <AddAdvanceModal
