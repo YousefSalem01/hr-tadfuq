@@ -3,9 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, Popover, Transition } from '@headlessui/react';
 import { Bell, User, ChevronDown, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { mockNotifications } from '../../data/mock';
+import { useAuthStore } from '../../store/authStore';
 
 const Header = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const unreadCount = useMemo(
     () => mockNotifications.filter((n) => !n.isRead).length,
@@ -87,8 +95,12 @@ const Header = () => {
                   <User size={20} className="text-gray-600" />
                 </div>
                 <div className="text-left">
-                  <div className="text-sm font-semibold text-gray-800">Mohamed Ali</div>
-                  <div className="text-xs text-gray-500">Admin</div>
+                  <div className="text-sm font-semibold text-gray-800">
+                    {user?.username || 'Guest'}
+                  </div>
+                  <div className="text-xs text-gray-500 capitalize">
+                    {user?.role || 'User'}
+                  </div>
                 </div>
                 <ChevronDown
                   size={16}
@@ -128,7 +140,7 @@ const Header = () => {
                         className={`w-full px-4 py-3 text-sm text-red-600 flex items-center gap-2 transition-colors ${
                           active ? 'bg-red-50' : ''
                         }`}
-                        onClick={() => navigate('/login')}
+                        onClick={handleLogout}
                       >
                         <LogOut size={16} className="text-red-500" />
                         Logout

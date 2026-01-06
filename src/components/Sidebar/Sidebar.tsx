@@ -14,9 +14,10 @@ import {
   History
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HrChip from '../../uikit/HrChip/HrChip';
 import logo from '../../assets/logos/logo.svg';
+import { useAuthStore } from '../../store/authStore';
 
 interface NavItem {
   icon: any;
@@ -27,6 +28,13 @@ interface NavItem {
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -82,16 +90,16 @@ const Sidebar = () => {
 
       {/* Bottom Section */}
       <div className="p-4 border-t space-y-1">
-        <a href="#">
+        <Link to="/settings">
           <HrChip icon={Settings} collapsed={collapsed}>
             Settings
           </HrChip>
-        </a>
-        <Link to="/login">
+        </Link>
+        <button onClick={handleLogout} className="w-full">
           <HrChip icon={LogOut} collapsed={collapsed} className="text-primary hover:bg-red-50">
             Log out
           </HrChip>
-        </Link>
+        </button>
       </div>
     </div>
   );
