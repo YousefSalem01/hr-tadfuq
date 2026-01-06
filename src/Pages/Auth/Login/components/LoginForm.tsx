@@ -45,6 +45,7 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
           iconPosition="left"
           showPasswordToggle
           error={errors.password?.message}
+          {...register('password')}
         />
 
         {/* Remember Me and Forgot Password */}
