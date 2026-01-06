@@ -2,8 +2,8 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { endpoints } from '../config/endpoints';
 
-// Use proxy in development, direct URL in production
-const BASE_URL = import.meta.env.DEV ? '' : import.meta.env.VITE_API_URL;
+// Always use the direct API URL
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance
 export const apiClient = axios.create({
