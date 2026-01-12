@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
 import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
-import { departmentOptions, branchOptions, currencyOptions, phoneCountryOptions } from '../data/mock';
+import HrAsyncSelectMenu, { AsyncSelectOption } from './HrAsyncSelectMenu/HrAsyncSelectMenu';
+import { currencyOptions, phoneCountryOptions } from '../data/mock';
+import { endpoints } from '../config/endpoints';
 import type { Employee } from '../Pages/Employees/types';
 
 interface EmployeeModalProps {
@@ -18,7 +20,7 @@ const getInitialFormData = () => ({
   fullName: '',
   email: '',
   role: '',
-  department: departmentOptions[0],
+  department: null as AsyncSelectOption | null,
   joinDate: '',
   phoneCountry: phoneCountryOptions[0],
   phoneNumber: '',
@@ -26,7 +28,7 @@ const getInitialFormData = () => ({
   emergencyContact: '',
   salary: '',
   salaryCurrency: currencyOptions[0],
-  branch: branchOptions[0],
+  branch: null as AsyncSelectOption | null,
 });
 
 const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: EmployeeModalProps) => {
@@ -37,8 +39,12 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
   // Populate form when editing
   useEffect(() => {
     if (isOpen && isEditMode && employee) {
-      const dept = departmentOptions.find(d => d.value === employee.department_detail?.name) || departmentOptions[0];
-      const branch = branchOptions.find(b => b.value === employee.branch_detail?.name) || branchOptions[0];
+      const dept: AsyncSelectOption | null = employee.department_detail
+        ? { value: employee.department_detail.id, label: employee.department_detail.name }
+        : null;
+      const branch: AsyncSelectOption | null = employee.branch_detail
+        ? { value: employee.branch_detail.id, label: employee.branch_detail.name }
+        : null;
       
       setFormData({
         fullName: employee.employee_name || '',
@@ -76,16 +82,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
     }
   };
 
+  const handleAsyncSelectChange = (name: string, value: AsyncSelectOption | null) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Convert Option values back to strings for submission
     const submitData = {
       ...formData,
       id: employee?.id,
-      department: formData.department.value,
+      department: formData.department?.value || null,
       phoneCountry: formData.phoneCountry.value,
       salaryCurrency: formData.salaryCurrency.value,
-      branch: formData.branch.value,
+      branch: formData.branch?.value || null,
     };
     onSubmit(submitData);
   };
@@ -216,12 +229,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
               />
 
               {/* Department */}
-              <HrSelectMenu
+              <HrAsyncSelectMenu
                 name="department"
                 label="Department"
-                options={departmentOptions}
+                placeholder="Select Department"
+                endpoint={endpoints.departments}
+                dataKey="items"
+                labelKey="name"
                 value={formData.department}
-                onChange={(option) => handleSelectChange('department', option as Option)}
+                onChange={(option) => handleAsyncSelectChange('department', option)}
               />
 
               {/* Salary */}
@@ -251,12 +267,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
               </div>
 
               {/* Branch */}
-              <HrSelectMenu
+              <HrAsyncSelectMenu
                 name="branch"
                 label="Branch"
-                options={branchOptions}
+                placeholder="Select Branch"
+                endpoint={endpoints.branches}
+                dataKey="items"
+                labelKey="name"
                 value={formData.branch}
-                onChange={(option) => handleSelectChange('branch', option as Option)}
+                onChange={(option) => handleAsyncSelectChange('branch', option)}
               />
             </div>
           </div>

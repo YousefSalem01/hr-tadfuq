@@ -11,4 +11,5 @@ export const endpoints = {
     import: '/api/employees/import',
   },
   departments: '/api/departments',
+  branches: '/api/branches',
 } as const;
