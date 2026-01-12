@@ -20,6 +20,7 @@ const Employees = () => {
     searchTerm,
     selectedDepartment,
     selectedStatus,
+    statusOptions,
     handleSearchChange,
     handleDepartmentFilter,
     handleStatusFilter,
@@ -74,6 +75,7 @@ const Employees = () => {
           <EmployeesFilters
             selectedDepartment={selectedDepartment}
             selectedStatus={selectedStatus}
+            statusOptions={statusOptions}
             onDepartmentFilter={handleDepartmentFilter}
             onStatusFilter={handleStatusFilter}
           />

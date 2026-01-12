@@ -5,5 +5,9 @@ export const endpoints = {
     refresh: '/api/auth/refresh',
   },
   dashboard: '/api/dashboard',
-  employees: '/api/employees',
+  employees: {
+    list: '/api/employees',
+    statuses: '/api/employees/statuses',
+  },
+  departments: '/api/departments',
 } as const;

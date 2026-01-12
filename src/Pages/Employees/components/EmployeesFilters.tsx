@@ -1,18 +1,21 @@
 import { Filter } from 'lucide-react';
 import HrButton from '../../../uikit/HrButton/HrButton';
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
-import { departmentOptions, statusOptions } from '../../../data/mock';
+import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
+import { endpoints } from '../../../config/endpoints';
 
 interface EmployeesFiltersProps {
-  selectedDepartment: Option | null;
+  selectedDepartment: AsyncSelectOption | null;
   selectedStatus: Option | null;
-  onDepartmentFilter: (option: Option | readonly Option[] | null) => void;
+  statusOptions: Option[];
+  onDepartmentFilter: (option: AsyncSelectOption | null) => void;
   onStatusFilter: (option: Option | readonly Option[] | null) => void;
 }
 
 const EmployeesFilters = ({
   selectedDepartment,
   selectedStatus,
+  statusOptions,
   onDepartmentFilter,
   onStatusFilter,
 }: EmployeesFiltersProps) => {
@@ -20,13 +23,14 @@ const EmployeesFilters = ({
     <div className="flex items-center gap-3">
       <HrButton variant="icon" icon={Filter} />
       <div className="w-48">
-        <HrSelectMenu
+        <HrAsyncSelectMenu
           name="department"
           placeholder="All Departments"
-          options={[{ value: '', label: 'All Departments' }, ...departmentOptions]}
           value={selectedDepartment}
           onChange={onDepartmentFilter}
-          isSearchable={false}
+          endpoint={endpoints.departments}
+          dataKey="items"
+          labelKey="name"
         />
       </div>
       <div className="w-40">

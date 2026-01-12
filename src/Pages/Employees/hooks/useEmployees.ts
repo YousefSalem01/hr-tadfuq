@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../../services/api';
 import { endpoints } from '../../../config/endpoints';
 import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
+import { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import type { Employee, EmployeesResponse, EmployeesData } from '../types';
+
+interface StatusOption {
+  id: number;
+  name: string;
+}
 
 export const useEmployees = () => {
   const [data, setData] = useState<EmployeesData | null>(null);
@@ -11,13 +17,59 @@ export const useEmployees = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<AsyncSelectOption | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<Option | null>(null);
+  const [statusOptions, setStatusOptions] = useState<Option[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
+  // Initial load: fetch employees and statuses in parallel
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const [employeesRes, statusesRes] = await Promise.all([
+          api.get<EmployeesResponse>(
+            `${endpoints.employees.list}?page=${currentPage}&limit=${pageSize}`
+          ),
+          api.get<StatusOption[]>(endpoints.employees.statuses),
+        ]);
+
+        // Handle employees response
+        if (employeesRes.success) {
+          setData(employeesRes.data);
+        } else {
+          setError(employeesRes.message || 'Failed to fetch employees');
+        }
+
+        // Handle statuses response
+        if (Array.isArray(statusesRes)) {
+          const options: Option[] = statusesRes.map((status) => ({
+            value: status.name.toLowerCase().replace(' ', '_'),
+            label: status.name,
+          }));
+          setStatusOptions(options);
+        }
+      } catch (err: any) {
+        console.error('Initial data fetch error:', err);
+        setError(err.response?.data?.message || err.message || 'Failed to fetch data');
+      } finally {
+        setIsLoading(false);
+        setIsInitialLoad(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // Fetch employees when filters/pagination change (skip initial load)
   const fetchEmployees = useCallback(async () => {
+    if (isInitialLoad) return;
+    
     setIsLoading(true);
     setError(null);
 
@@ -27,7 +79,7 @@ export const useEmployees = () => {
       const statusParam = selectedStatus?.value ? `&status=${selectedStatus.value}` : '';
       
       const response = await api.get<EmployeesResponse>(
-        `${endpoints.employees}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
+        `${endpoints.employees.list}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
       );
 
       if (response.success) {
@@ -41,11 +93,13 @@ export const useEmployees = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchTerm, selectedDepartment, selectedStatus]);
+  }, [currentPage, pageSize, searchTerm, selectedDepartment, selectedStatus, isInitialLoad]);
 
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    if (!isInitialLoad) {
+      fetchEmployees();
+    }
+  }, [fetchEmployees, isInitialLoad]);
 
   // Derived stats from API response
   const stats = {
@@ -60,15 +114,12 @@ export const useEmployees = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleDepartmentFilter = useCallback((option: Option | readonly Option[] | null) => {
-    //TODO: Implement department filter
-    const next = Array.isArray(option) ? null : (option as Option | null);
-    setSelectedDepartment(next?.value ? next : null);
+  const handleDepartmentFilter = useCallback((option: AsyncSelectOption | null) => {
+    setSelectedDepartment(option);
     setCurrentPage(1);
   }, []);
 
   const handleStatusFilter = useCallback((option: Option | readonly Option[] | null) => {
-    //TODO: Implement status filter
     const next = Array.isArray(option) ? null : (option as Option | null);
     setSelectedStatus(next?.value ? next : null);
     setCurrentPage(1);
@@ -131,6 +182,7 @@ export const useEmployees = () => {
     searchTerm,
     selectedDepartment,
     selectedStatus,
+    statusOptions,
     handleSearchChange,
     handleDepartmentFilter,
     handleStatusFilter,
