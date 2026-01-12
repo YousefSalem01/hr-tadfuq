@@ -8,54 +8,35 @@
  * Returns combined classes for background, text, and border colors
  */
 export const getStatusBadgeColor = (status: string): string => {
-  switch (status) {
+  const normalizedStatus = status.toLowerCase();
+  
+  switch (normalizedStatus) {
     // Active/Success states
-    case 'Active':
-      return 'bg-green-100 text-green-700 border-green-200';
+    case 'active':
+    case 'approved':
+    case 'present':
+      return 'bg-[#6ce9a620] text-[#039855] border-[#6ce9a640]';
     
-    // Approved states
-    case 'Approved':
-      return 'bg-green-100 text-green-700 border-green-200';
-    
-    // Present state (Attendance)
-    case 'Present':
-      return 'bg-green-100 text-green-700 border-green-200';
-    
-    // Pending/Warning states
-    case 'Pending':
+    // On Leave/Warning states
+    case 'on_leave':
+    case 'on leave':
     case 'pending':
-      return 'bg-orange-100 text-orange-700 border-orange-200';
+    case 'late':
+      return 'bg-[#fde68a20] text-[#f59e0b] border-[#fde68a40]';
     
-    // On Leave states
-    case 'On Leave':
-      return 'bg-orange-100 text-orange-700 border-orange-200';
-    
-    // Late state (Attendance)
-    case 'Late':
-      return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    // Inactive/Error states
+    case 'inactive':
+    case 'rejected':
+    case 'expired':
+    case 'absent':
+      return 'bg-[#fecdd320] text-[#ef4444] border-[#fecdd340]';
     
     // Remote state (Attendance)
-    case 'Remote':
+    case 'remote':
       return 'bg-blue-100 text-blue-700 border-blue-200';
     
-    // Rejected/Error states
-    case 'Rejected':
-      return 'bg-red-100 text-red-700 border-red-200';
-    
-    // Expired states
-    case 'Expired':
-      return 'bg-red-100 text-red-700 border-red-200';
-    
-    // Inactive states
-    case 'Inactive':
-      return 'bg-red-100 text-red-700 border-red-200';
-    
-    // Absent state (Attendance)
-    case 'Absent':
-      return 'bg-red-100 text-red-700 border-red-200';
-    
     // Hold/Neutral states
-    case 'Hold':
+    case 'hold':
       return 'bg-gray-100 text-gray-700 border-gray-200';
     
     // Default fallback

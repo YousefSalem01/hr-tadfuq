@@ -135,19 +135,19 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
 
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${className}`.trim()}>
-      {(title || rightActions) && (
+      {title && (
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
           <div>
-            {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
           </div>
           {rightActions && <div className="flex items-center gap-3">{rightActions}</div>}
         </div>
       )}
 
-      {/* Optional table-level search (most pages use external filters like the Figma design) */}
+      {/* Optional table-level search with filters */}
       {showControls && onSearchChange ? (
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="w-full max-w-md">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
+          <div className="flex-1 max-w-md">
             <HrInput
               variant="text"
               name="tableSearch"
@@ -158,6 +158,7 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
               iconPosition="left"
             />
           </div>
+          {!title && rightActions && <div className="flex items-center gap-3">{rightActions}</div>}
         </div>
       ) : null}
 

@@ -26,7 +26,7 @@ const HrCard = ({
         {/* Icon */}
         <div 
           className="w-[60px] h-[60px] flex items-center justify-center rounded-xl flex-shrink-0"
-          style={{ backgroundColor: iconBgColor ? iconBgColor : '#FDEDED' }}
+          style={{ backgroundColor: iconBgColor ? iconBgColor : '#a635341a' }}
         >
           <Icon style={{ color: iconColor ? iconColor : '#A63534' }} size={24} />
         </div>

@@ -58,17 +58,7 @@ const Employees = () => {
       {/* Statistics Cards */}
       <SummaryCards stats={stats} />
 
-      {/* Filters and Search */}
-      <EmployeesFilters
-        searchTerm={searchTerm}
-        selectedDepartment={selectedDepartment}
-        selectedStatus={selectedStatus}
-        onSearchChange={handleSearchChange}
-        onDepartmentFilter={handleDepartmentFilter}
-        onStatusFilter={handleStatusFilter}
-      />
-
-      {/* Employees Table */}
+      {/* Employees Table with Filters */}
       <EmployeesTable
         employees={employees}
         isLoading={isLoading}
@@ -78,6 +68,16 @@ const Employees = () => {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
         onDeleteClick={handleDeleteClick}
+        searchValue={searchTerm}
+        onSearchChange={handleSearchChange}
+        rightActions={
+          <EmployeesFilters
+            selectedDepartment={selectedDepartment}
+            selectedStatus={selectedStatus}
+            onDepartmentFilter={handleDepartmentFilter}
+            onStatusFilter={handleStatusFilter}
+          />
+        }
       />
 
       {/* Add Employee Modal */}
@@ -94,7 +94,7 @@ const Employees = () => {
         onConfirm={handleDeleteConfirm}
         title="Delete Employee"
         message="Are you sure you want to delete"
-        itemName={selectedEmployee?.name}
+        itemName={selectedEmployee?.employee_name}
         confirmText="Delete"
         type="danger"
       />

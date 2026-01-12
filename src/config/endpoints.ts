@@ -5,4 +5,5 @@ export const endpoints = {
     refresh: '/api/auth/refresh',
   },
   dashboard: '/api/dashboard',
+  employees: '/api/employees',
 } as const;

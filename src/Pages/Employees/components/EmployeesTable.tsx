@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, ReactNode } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, Trash2, Edit, HelpCircle } from 'lucide-react';
 import HrTable from '../../../uikit/HrTable/HrTable';
 import HrButton from '../../../uikit/HrButton/HrButton';
-import { Employee } from '../../../data/mock';
-import { getInitials, getStatusBadgeColor } from '../../../utils';
+import type { Employee } from '../types';
+import { getStatusBadgeColor } from '../../../utils';
 
 interface EmployeesTableProps {
   employees: Employee[];
@@ -15,6 +15,9 @@ interface EmployeesTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onDeleteClick: (employee: Employee) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  rightActions?: ReactNode;
 }
 
 const EmployeesTable = ({
@@ -26,11 +29,14 @@ const EmployeesTable = ({
   onPageChange,
   onPageSizeChange,
   onDeleteClick,
+  searchValue,
+  onSearchChange,
+  rightActions,
 }: EmployeesTableProps) => {
   const columns = useMemo<ColumnDef<Employee>[]>(() => {
     return [
       {
-        accessorKey: 'name',
+        accessorKey: 'employee_name',
         header: () => (
           <div className="flex items-center gap-1">
             Employees
@@ -38,14 +44,7 @@ const EmployeesTable = ({
           </div>
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-              {getInitials(row.original.name)}
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-gray-900">{row.original.name}</div>
-            </div>
-          </div>
+          <div className="text-sm font-semibold text-gray-900">{row.original.employee_name}</div>
         ),
       },
       {
@@ -56,12 +55,12 @@ const EmployeesTable = ({
             <HelpCircle size={14} className="text-gray-400" />
           </div>
         ),
-        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.role}</div>,
+        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.role || 'N/A'}</div>,
       },
       {
-        accessorKey: 'department',
+        accessorKey: 'department_detail',
         header: 'Department',
-        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.department}</div>,
+        cell: ({ row }) => <div className="text-sm text-gray-700">{row.original.department_detail?.name || 'N/A'}</div>,
       },
       {
         accessorKey: 'email',
@@ -85,7 +84,7 @@ const EmployeesTable = ({
       },
       {
         id: 'actions',
-        header: () => <div className="w-full text-right" />,
+        header: () => <div className="w-full text-right">Actions</div>,
         cell: ({ row }) => (
           <div className="flex items-center justify-end gap-2">
             <HrButton variant="icon" icon={Edit} />
@@ -112,6 +111,10 @@ const EmployeesTable = ({
       totalItems={totalItems}
       onPageChange={onPageChange}
       onPageSizeChange={onPageSizeChange}
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
+      searchPlaceholder="Search employees..."
+      rightActions={rightActions}
     />
   );
 };

@@ -1,14 +1,15 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { mockEmployees, Employee } from '../../../data/mock';
+import { useState, useEffect, useCallback } from 'react';
+import { api } from '../../../services/api';
+import { endpoints } from '../../../config/endpoints';
 import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
+import type { Employee, EmployeesResponse, EmployeesData } from '../types';
 
 export const useEmployees = () => {
-  const [allEmployees, setAllEmployees] = useState<Employee[]>(mockEmployees);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [data, setData] = useState<EmployeesData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [filteredCount, setFilteredCount] = useState(mockEmployees.length);
-  const [isLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<Option | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<Option | null>(null);
@@ -16,40 +17,43 @@ export const useEmployees = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
-  // Statistics
-  const stats = useMemo(() => ({
-    total: allEmployees.length,
-    active: allEmployees.filter(e => e.status === 'Active').length,
-    onLeave: allEmployees.filter(e => e.status === 'On Leave').length,
-    inactive: allEmployees.filter(e => e.status === 'Inactive').length,
-  }), [allEmployees]);
+  const fetchEmployees = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-  // Filter and paginate employees
-  useEffect(() => {
-    let filtered = allEmployees;
-
-    if (searchTerm) {
-      filtered = filtered.filter(emp =>
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.role.toLowerCase().includes(searchTerm.toLowerCase())
+    try {
+      const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
+      const departmentParam = selectedDepartment?.value ? `&department=${selectedDepartment.value}` : '';
+      const statusParam = selectedStatus?.value ? `&status=${selectedStatus.value}` : '';
+      
+      const response = await api.get<EmployeesResponse>(
+        `${endpoints.employees}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
       );
-    }
 
-    if (selectedDepartment?.value) {
-      filtered = filtered.filter(emp => emp.department === selectedDepartment.value);
+      if (response.success) {
+        setData(response.data);
+      } else {
+        setError(response.message || 'Failed to fetch employees');
+      }
+    } catch (err: any) {
+      console.error('Employees fetch error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to fetch employees');
+    } finally {
+      setIsLoading(false);
     }
+  }, [currentPage, pageSize, searchTerm, selectedDepartment, selectedStatus]);
 
-    if (selectedStatus?.value) {
-      filtered = filtered.filter(emp => emp.status === selectedStatus.value);
-    }
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
-    setFilteredCount(filtered.length);
-    
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    setEmployees(filtered.slice(startIndex, endIndex));
-  }, [searchTerm, selectedDepartment, selectedStatus, currentPage, allEmployees, pageSize]);
+  // Derived stats from API response
+  const stats = {
+    total: data?.summary.total_employees || 0,
+    active: data?.summary.active_employees || 0,
+    onLeave: data?.summary.on_leave_employees || 0,
+    inactive: data?.summary.inactive_employees || 0,
+  };
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchTerm(value);
@@ -57,12 +61,14 @@ export const useEmployees = () => {
   }, []);
 
   const handleDepartmentFilter = useCallback((option: Option | readonly Option[] | null) => {
+    //TODO: Implement department filter
     const next = Array.isArray(option) ? null : (option as Option | null);
     setSelectedDepartment(next?.value ? next : null);
     setCurrentPage(1);
   }, []);
 
   const handleStatusFilter = useCallback((option: Option | readonly Option[] | null) => {
+    //TODO: Implement status filter
     const next = Array.isArray(option) ? null : (option as Option | null);
     setSelectedStatus(next?.value ? next : null);
     setCurrentPage(1);
@@ -77,26 +83,11 @@ export const useEmployees = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleAddEmployee = useCallback((employeeData: any) => {
-    const newEmployee: Employee = {
-      id: allEmployees.length + 1,
-      name: employeeData.fullName || employeeData.name,
-      email: employeeData.email,
-      role: employeeData.role,
-      department: employeeData.department,
-      phone_country: employeeData.phoneCountry,
-      phone_number: employeeData.phoneNumber,
-      address: employeeData.address,
-      emergency_contact: employeeData.emergencyContact,
-      salary: employeeData.salary,
-      salary_currency: employeeData.salaryCurrency,
-      branch: employeeData.branch,
-      join_date: employeeData.joinDate,
-      status: employeeData.status || 'Active',
-    };
-    setAllEmployees(prev => [...prev, newEmployee]);
+  const handleAddEmployee = useCallback((_employeeData: any) => {
+    // TODO: Implement add employee API call
     setIsModalOpen(false);
-  }, [allEmployees.length]);
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   const handleDeleteClick = useCallback((employee: Employee) => {
     setSelectedEmployee(employee);
@@ -105,11 +96,12 @@ export const useEmployees = () => {
 
   const handleDeleteConfirm = useCallback(() => {
     if (selectedEmployee) {
-      setAllEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
+      // TODO: Implement delete employee API call
       setIsDeleteModalOpen(false);
       setSelectedEmployee(null);
+      fetchEmployees();
     }
-  }, [selectedEmployee]);
+  }, [selectedEmployee, fetchEmployees]);
 
   const openAddModal = useCallback(() => setIsModalOpen(true), []);
   const closeAddModal = useCallback(() => setIsModalOpen(false), []);
@@ -120,14 +112,18 @@ export const useEmployees = () => {
 
   return {
     // Data
-    employees,
+    employees: data?.items || [],
     stats,
-    filteredCount,
+    filteredCount: data?.pagination.total_records || 0,
     isLoading,
+    error,
     
     // Pagination
-    currentPage,
-    pageSize,
+    currentPage: data?.pagination.current_page || 1,
+    pageSize: data?.pagination.limit || 10,
+    totalPages: data?.pagination.total_pages || 1,
+    hasNext: data?.pagination.has_next || false,
+    hasPrevious: data?.pagination.has_previous || false,
     handlePageChange,
     handlePageSizeChange,
     
@@ -151,5 +147,6 @@ export const useEmployees = () => {
     handleAddEmployee,
     handleDeleteClick,
     handleDeleteConfirm,
+    refetch: fetchEmployees,
   };
 };

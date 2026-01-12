@@ -22,16 +22,22 @@ const SummaryCards = ({ stats }: SummaryCardsProps) => {
         title="Active"
         value={stats.active}
         icon={UserCheck}
+        iconBgColor="#6ce9a620"
+        iconColor='#039855'
       />
       <HrCard
         title="On Leave"
         value={stats.onLeave}
         icon={Calendar}
+        iconBgColor="#fde68a20"
+        iconColor='#f59e0b'
       />
       <HrCard
         title="Inactive"
         value={stats.inactive}
         icon={UserX}
+        iconBgColor="#fecdd320"
+        iconColor='#ef4444'
       />
     </div>
   );
