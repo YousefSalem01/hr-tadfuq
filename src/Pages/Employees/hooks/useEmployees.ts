@@ -5,7 +5,7 @@ import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import type { Employee, EmployeesResponse, EmployeesData } from '../types';
 
-interface StatusOption {
+interface StatusApiItem {
   id: number;
   name: string;
 }
@@ -18,8 +18,8 @@ export const useEmployees = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<AsyncSelectOption | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<Option | null>(null);
-  const [statusOptions, setStatusOptions] = useState<Option[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<Option<number> | null>(null);
+  const [statusOptions, setStatusOptions] = useState<Option<number>[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -36,7 +36,7 @@ export const useEmployees = () => {
           api.get<EmployeesResponse>(
             `${endpoints.employees.list}?page=${currentPage}&limit=${pageSize}`
           ),
-          api.get<StatusOption[]>(endpoints.employees.statuses),
+          api.get<StatusApiItem[]>(endpoints.employees.statuses),
         ]);
 
         // Handle employees response
@@ -48,8 +48,8 @@ export const useEmployees = () => {
 
         // Handle statuses response
         if (Array.isArray(statusesRes)) {
-          const options: Option[] = statusesRes.map((status) => ({
-            value: status.name.toLowerCase().replace(' ', '_'),
+          const options: Option<number>[] = statusesRes.map((status) => ({
+            value: status.id,
             label: status.name,
           }));
           setStatusOptions(options);
@@ -119,8 +119,8 @@ export const useEmployees = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleStatusFilter = useCallback((option: Option | readonly Option[] | null) => {
-    const next = Array.isArray(option) ? null : (option as Option | null);
+  const handleStatusFilter = useCallback((option: Option<number> | readonly Option<number>[] | null) => {
+    const next = Array.isArray(option) ? null : (option as Option<number> | null);
     setSelectedStatus(next?.value ? next : null);
     setCurrentPage(1);
   }, []);

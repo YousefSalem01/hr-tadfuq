@@ -1,15 +1,13 @@
-import { Filter } from 'lucide-react';
-import HrButton from '../../../uikit/HrButton/HrButton';
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import { endpoints } from '../../../config/endpoints';
 
 interface EmployeesFiltersProps {
   selectedDepartment: AsyncSelectOption | null;
-  selectedStatus: Option | null;
-  statusOptions: Option[];
+  selectedStatus: Option<number> | null;
+  statusOptions: Option<number>[];
   onDepartmentFilter: (option: AsyncSelectOption | null) => void;
-  onStatusFilter: (option: Option | readonly Option[] | null) => void;
+    onStatusFilter: (option: Option<number> | readonly Option<number>[] | null) => void;
 }
 
 const EmployeesFilters = ({
@@ -21,7 +19,6 @@ const EmployeesFilters = ({
 }: EmployeesFiltersProps) => {
   return (
     <div className="flex items-center gap-3">
-      <HrButton variant="icon" icon={Filter} />
       <div className="w-48">
         <HrAsyncSelectMenu
           name="department"
@@ -34,13 +31,14 @@ const EmployeesFilters = ({
         />
       </div>
       <div className="w-40">
-        <HrSelectMenu
+        <HrSelectMenu<number>
           name="status"
           placeholder="All Statuses"
-          options={[{ value: '', label: 'All Statuses' }, ...statusOptions]}
+          options={statusOptions}
           value={selectedStatus}
           onChange={onStatusFilter}
           isSearchable={false}
+          isClearable
         />
       </div>
     </div>
