@@ -8,6 +8,7 @@ export const endpoints = {
   employees: {
     list: '/api/employees',
     statuses: '/api/employees/statuses',
+    import: '/api/employees/import',
   },
   departments: '/api/departments',
 } as const;

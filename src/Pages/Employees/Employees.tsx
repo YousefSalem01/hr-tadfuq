@@ -4,8 +4,9 @@ import SummaryCards from './components/SummaryCards';
 import EmployeesFilters from './components/EmployeesFilters';
 import EmployeesTable from './components/EmployeesTable';
 import HrButton from '../../uikit/HrButton/HrButton';
-import AddEmployeeModal from '../../uikit/AddEmployeeModal';
+import EmployeeModal from '../../uikit/EmployeeModal';
 import HrConfirmationModal from '../../uikit/HrConfirmationModal/HrConfirmationModal';
+import ImportEmployeesModal from './components/ImportEmployeesModal';
 
 const Employees = () => {
   const {
@@ -25,12 +26,20 @@ const Employees = () => {
     handleDepartmentFilter,
     handleStatusFilter,
     isModalOpen,
+    modalMode,
     isDeleteModalOpen,
+    isImportModalOpen,
+    isImporting,
+    importError,
     selectedEmployee,
     openAddModal,
-    closeAddModal,
+    openEditModal,
+    closeModal,
     closeDeleteModal,
-    handleAddEmployee,
+    openImportModal,
+    closeImportModal,
+    handleImportEmployees,
+    handleSubmitEmployee,
     handleDeleteClick,
     handleDeleteConfirm,
   } = useEmployees();
@@ -47,7 +56,7 @@ const Employees = () => {
           <HrButton variant="secondary" icon={Download}>
             Export Report
           </HrButton>
-          <HrButton variant="secondary" icon={Upload}>
+          <HrButton variant="secondary" icon={Upload} onClick={openImportModal}>
             Import Data
           </HrButton>
           <HrButton variant="primary" icon={Plus} onClick={openAddModal}>
@@ -68,6 +77,7 @@ const Employees = () => {
         totalItems={filteredCount}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+        onEditClick={openEditModal}
         onDeleteClick={handleDeleteClick}
         searchValue={searchTerm}
         onSearchChange={handleSearchChange}
@@ -82,11 +92,13 @@ const Employees = () => {
         }
       />
 
-      {/* Add Employee Modal */}
-      <AddEmployeeModal
+      {/* Employee Modal (Add/Edit) */}
+      <EmployeeModal
         isOpen={isModalOpen}
-        onClose={closeAddModal}
-        onAdd={handleAddEmployee}
+        onClose={closeModal}
+        onSubmit={handleSubmitEmployee}
+        employee={selectedEmployee}
+        mode={modalMode}
       />
 
       {/* Delete Confirmation Modal */}
@@ -99,6 +111,15 @@ const Employees = () => {
         itemName={selectedEmployee?.employee_name}
         confirmText="Delete"
         type="danger"
+      />
+
+      {/* Import Employees Modal */}
+      <ImportEmployeesModal
+        isOpen={isImportModalOpen}
+        onClose={closeImportModal}
+        onImport={handleImportEmployees}
+        isLoading={isImporting}
+        error={importError}
       />
     </div>
   );

@@ -14,6 +14,7 @@ interface EmployeesTableProps {
   totalItems: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  onEditClick: (employee: Employee) => void;
   onDeleteClick: (employee: Employee) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -28,6 +29,7 @@ const EmployeesTable = ({
   totalItems,
   onPageChange,
   onPageSizeChange,
+  onEditClick,
   onDeleteClick,
   searchValue,
   onSearchChange,
@@ -87,7 +89,11 @@ const EmployeesTable = ({
         header: () => <div className="w-full text-right">Actions</div>,
         cell: ({ row }) => (
           <div className="flex items-center justify-end gap-2">
-            <HrButton variant="icon" icon={Edit} />
+            <HrButton
+              variant="icon"
+              icon={Edit}
+              onClick={() => onEditClick(row.original)}
+            />
             <HrButton
               variant="icon"
               icon={Trash2}
@@ -98,7 +104,7 @@ const EmployeesTable = ({
         ),
       },
     ];
-  }, [onDeleteClick]);
+  }, [onEditClick, onDeleteClick]);
 
   return (
     <HrTable<Employee>

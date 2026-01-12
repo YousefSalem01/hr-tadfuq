@@ -22,7 +22,11 @@ export const useEmployees = () => {
   const [statusOptions, setStatusOptions] = useState<Option<number>[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   // Initial load: fetch employees and statuses in parallel
@@ -134,9 +138,10 @@ export const useEmployees = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleAddEmployee = useCallback((_employeeData: any) => {
-    // TODO: Implement add employee API call
+  const handleSubmitEmployee = useCallback((_employeeData: any) => {
+    // TODO: Implement add/edit employee API call
     setIsModalOpen(false);
+    setSelectedEmployee(null);
     fetchEmployees();
   }, [fetchEmployees]);
 
@@ -154,12 +159,55 @@ export const useEmployees = () => {
     }
   }, [selectedEmployee, fetchEmployees]);
 
-  const openAddModal = useCallback(() => setIsModalOpen(true), []);
-  const closeAddModal = useCallback(() => setIsModalOpen(false), []);
+  const openAddModal = useCallback(() => {
+    setSelectedEmployee(null);
+    setModalMode('add');
+    setIsModalOpen(true);
+  }, []);
+
+  const openEditModal = useCallback((employee: Employee) => {
+    setSelectedEmployee(employee);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedEmployee(null);
+  }, []);
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
     setSelectedEmployee(null);
   }, []);
+
+  const openImportModal = useCallback(() => {
+    setImportError(null);
+    setIsImportModalOpen(true);
+  }, []);
+
+  const closeImportModal = useCallback(() => {
+    setIsImportModalOpen(false);
+    setImportError(null);
+  }, []);
+
+  const handleImportEmployees = useCallback(async (file: File) => {
+    setIsImporting(true);
+    setImportError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await api.postFormData(endpoints.employees.import, formData);
+      setIsImportModalOpen(false);
+      fetchEmployees();
+    } catch (err: any) {
+      console.error('Import error:', err);
+      setImportError(err.response?.data?.message || err.message || 'Failed to import employees');
+    } finally {
+      setIsImporting(false);
+    }
+  }, [fetchEmployees]);
 
   return {
     // Data
@@ -189,14 +237,22 @@ export const useEmployees = () => {
     
     // Modals
     isModalOpen,
+    modalMode,
     isDeleteModalOpen,
+    isImportModalOpen,
+    isImporting,
+    importError,
     selectedEmployee,
     openAddModal,
-    closeAddModal,
+    openEditModal,
+    closeModal,
     closeDeleteModal,
+    openImportModal,
+    closeImportModal,
+    handleImportEmployees,
     
     // Actions
-    handleAddEmployee,
+    handleSubmitEmployee,
     handleDeleteClick,
     handleDeleteConfirm,
     refetch: fetchEmployees,
