@@ -50,11 +50,11 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className={`bg-white h-screen shadow-lg transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex flex-col`}>
+    <div className={`bg-white h-screen transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex flex-col`} style={{ borderRight: '0.6px solid #D5D7DA' }}>
       {/* Logo Section */}
-      <div className="p-6 border-b">
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-3 ${collapsed ? 'justify-center w-full' : ''}`}>
+      <div className="px-6 h-[73px] flex items-center" style={{ borderBottom: '0.6px solid #D5D7DA' }}>
+        <div className="flex items-center justify-between w-full gap-4">
+          <div className={`flex items-center ${collapsed ? 'justify-center w-full' : ''}`}>
             <img 
               src={logo} 
               alt="Santalam Tax Consultancy" 
@@ -63,7 +63,7 @@ const Sidebar = () => {
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-gray-100 rounded flex-shrink-0"
           >
             <ChevronLeft size={20} className={collapsed ? 'rotate-180' : ''} />
           </button>
@@ -89,7 +89,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t space-y-1">
+      <div className="p-4 space-y-1" style={{ borderTop: '0.6px solid #D5D7DA' }}>
         <Link to="/settings">
           <HrChip icon={Settings} collapsed={collapsed}>
             Settings

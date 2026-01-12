@@ -13,6 +13,9 @@ export default {
           dark: '#B91C1C',
         },
       },
+      borderRadius: {
+        xl: '16px',
+      },
     },
   },
   plugins: [],

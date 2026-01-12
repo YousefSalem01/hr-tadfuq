@@ -25,7 +25,7 @@ const HrCard = ({
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 ${iconBgColor} rounded-lg`}>
+        <div className={`p-3 ${iconBgColor} rounded-xl`}>
           <Icon className={iconColor} style={{ color: iconColor ? undefined : '#A63534' }} size={24} />
         </div>
         {change !== undefined && (

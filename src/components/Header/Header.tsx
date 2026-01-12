@@ -21,7 +21,7 @@ const Header = () => {
   );
 
   return (
-    <header className="bg-white shadow-sm h-16 flex items-center justify-end px-6">
+    <header className="bg-white h-[73px] flex items-center justify-end px-6" style={{ borderBottom: '0.6px solid #D5D7DA' }}>
       <div className="flex items-center gap-4">
         <Popover className="relative">
           {({ open }) => (
