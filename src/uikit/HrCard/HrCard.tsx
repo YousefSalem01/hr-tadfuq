@@ -17,7 +17,7 @@ const HrCard = ({
   change, 
   icon: Icon,
   iconBgColor = 'bg-gray-50',
-  iconColor = 'text-gray-700',
+  iconColor,
   subtitle
 }: HrCardProps) => {
   const isPositive = change !== undefined ? change >= 0 : true;
@@ -26,7 +26,7 @@ const HrCard = ({
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <div className="flex items-start justify-between mb-4">
         <div className={`p-3 ${iconBgColor} rounded-lg`}>
-          <Icon className={iconColor} size={24} />
+          <Icon className={iconColor} style={{ color: iconColor ? undefined : '#A63534' }} size={24} />
         </div>
         {change !== undefined && (
           <div className={`flex items-center gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
