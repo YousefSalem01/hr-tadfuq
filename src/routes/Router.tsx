@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Header from '../components/Header/Header';
 import Login from '../Pages/Auth/Login/Login';
-import Dashboard from '../Pages/Dashboard';
+import Dashboard from '../Pages/Dashboard/Dashboard';
 import Employees from '../Pages/Employees';
 import Attendance from '../Pages/Attendance';
 import Leaves from '../Pages/Leaves';

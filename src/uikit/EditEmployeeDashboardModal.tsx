@@ -3,12 +3,18 @@ import { X } from 'lucide-react';
 import HrButton from './HrButton/HrButton';
 import HrInput from './HrInput/HrInput';
 import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
-import { mockEmployees, type Employee } from '../data/mock';
+import { mockEmployees } from '../data/mock';
+
+interface EmployeeData {
+  id: number;
+  name: string;
+  role: string;
+}
 
 interface EditEmployeeDashboardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  employee: Employee | null;
+  employee: EmployeeData | null;
   onSave?: (employeeId: number, updates: { name: string; role: string }) => void;
 }
 

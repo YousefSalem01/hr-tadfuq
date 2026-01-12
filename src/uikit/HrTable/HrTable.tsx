@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo, useState, useEffect, useRef } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -75,6 +75,35 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
     showControls = true,
   } = props;
 
+  // Local state for immediate input display
+  const [localSearch, setLocalSearch] = useState(searchValue ?? '');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync local state when searchValue prop changes externally
+  useEffect(() => {
+    setLocalSearch(searchValue ?? '');
+  }, [searchValue]);
+
+  // Debounced search handler
+  const handleSearchInput = (value: string) => {
+    setLocalSearch(value);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      onSearchChange?.(value);
+    }, 500);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
   const table = useReactTable({
     data,
     columns,
@@ -118,19 +147,17 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
       {/* Optional table-level search (most pages use external filters like the Figma design) */}
       {showControls && onSearchChange ? (
         <div className="px-6 py-4 border-b border-gray-200">
-          {onSearchChange ? (
-            <div className="w-full max-w-md">
-              <HrInput
-                variant="text"
-                name="tableSearch"
-                value={searchValue ?? ''}
-                onChange={(e) => onSearchChange((e.target as HTMLInputElement).value)}
-                placeholder={searchPlaceholder}
-                icon={Search}
-                iconPosition="left"
-              />
-            </div>
-          ) : null}
+          <div className="w-full max-w-md">
+            <HrInput
+              variant="text"
+              name="tableSearch"
+              value={localSearch}
+              onChange={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
+              placeholder={searchPlaceholder}
+              icon={Search}
+              iconPosition="left"
+            />
+          </div>
         </div>
       ) : null}
 

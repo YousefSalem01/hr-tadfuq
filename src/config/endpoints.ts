@@ -4,4 +4,5 @@ export const endpoints = {
     logout: '/api/auth/logout',
     refresh: '/api/auth/refresh',
   },
+  dashboard: '/api/dashboard',
 } as const;
