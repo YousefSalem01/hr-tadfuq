@@ -148,38 +148,22 @@ const Leaves = () => {
         <HrCard
           title="Total Requests"
           value="124"
-          change={5.2}
           icon={Calendar}
-          iconBgColor="bg-red-50"
-          iconColor="text-primary"
-          subtitle="from last month"
         />
         <HrCard
           title="Pending requests"
           value="118"
-          change={2.1}
           icon={Clock}
-          iconBgColor="bg-red-50"
-          iconColor="text-primary"
-          subtitle="from last month"
         />
         <HrCard
           title="Approved requests"
           value="8"
-          change={-12.5}
           icon={CheckCircle}
-          iconBgColor="bg-red-50"
-          iconColor="text-primary"
-          subtitle="from last month"
         />
         <HrCard
           title="Rejected Requests"
           value="8"
-          change={8.3}
           icon={XCircle}
-          iconBgColor="bg-red-50"
-          iconColor="text-primary"
-          subtitle="from last month"
         />
       </div>
 
