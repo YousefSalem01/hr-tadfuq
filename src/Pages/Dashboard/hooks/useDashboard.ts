@@ -3,26 +3,22 @@ import { api } from '../../../services/api';
 import { endpoints } from '../../../config/endpoints';
 import type { DashboardResponse, DashboardData } from '../types';
 
-interface UseDashboardParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-}
-
-export const useDashboard = ({ page = 1, limit = 10, search = '' }: UseDashboardParams = {}) => {
+export const useDashboard = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchValue, setSearchValue] = useState('');
 
   const fetchDashboard = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
-      console.log(`${endpoints.dashboard}?page=${page}&limit=${limit}${searchParam}`);
+      const searchParam = searchValue ? `&search=${encodeURIComponent(searchValue)}` : '';
       const response = await api.get<DashboardResponse>(
-        `${endpoints.dashboard}?page=${page}&limit=${limit}${searchParam}`
+        `${endpoints.dashboard}?page=${currentPage}&limit=${pageSize}${searchParam}`
       );
 
       if (response.success) {
@@ -36,16 +32,36 @@ export const useDashboard = ({ page = 1, limit = 10, search = '' }: UseDashboard
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, search]);
+  }, [currentPage, pageSize, searchValue]);
 
   useEffect(() => {
     fetchDashboard();
   }, [fetchDashboard]);
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    setCurrentPage(1);
+  };
+
   return {
     data,
     isLoading,
     error,
+    currentPage,
+    pageSize,
+    searchValue,
+    handlePageChange,
+    handlePageSizeChange,
+    handleSearchChange,
     refetch: fetchDashboard,
   };
 };

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useDashboard } from './hooks/useDashboard';
 import WelcomeHeader from './components/WelcomeHeader';
 import SummaryCards from './components/SummaryCards';
@@ -7,20 +6,15 @@ import RecentActivitiesFeed from './components/RecentActivitiesFeed';
 import EmployeesTable from './components/EmployeesTable';
 
 const Dashboard = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchValue, setSearchValue] = useState('');
-
-  const { data, isLoading, error } = useDashboard({
-    page: currentPage,
-    limit: pageSize,
-    search: searchValue,
-  });
-
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-    setCurrentPage(1); // Reset to first page on search
-  };
+  const {
+    data,
+    isLoading,
+    error,
+    searchValue,
+    handlePageChange,
+    handlePageSizeChange,
+    handleSearchChange,
+  } = useDashboard();
 
   if (error) {
     return (
@@ -56,8 +50,8 @@ const Dashboard = () => {
         totalPages={data?.pagination.total_pages || 1}
         hasNext={data?.pagination.has_next || false}
         hasPrevious={data?.pagination.has_previous || false}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         searchValue={searchValue}
         onSearchChange={handleSearchChange}
       />
