@@ -1,46 +1,35 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
 interface HrCardProps {
   title: string;
   value: string | number;
-  change?: number;
   icon: LucideIcon;
   iconBgColor?: string;
   iconColor?: string;
-  subtitle?: string;
 }
 
 const HrCard = ({ 
   title, 
   value, 
-  change, 
   icon: Icon,
-  iconBgColor = 'bg-gray-50',
+  iconBgColor,
   iconColor,
-  subtitle
 }: HrCardProps) => {
-  const isPositive = change !== undefined ? change >= 0 : true;
-
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 ${iconBgColor} rounded-xl`}>
-          <Icon className={iconColor} style={{ color: iconColor ? undefined : '#A63534' }} size={24} />
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <div className="flex items-center justify-between gap-4">
+        {/* Label and Value */}
+        <div>
+          <div className="text-sm font-normal leading-5" style={{ color: '#A4A7AE' }}>{title}</div>
+          <div className="text-2xl font-bold leading-8 text-gray-900">{value}</div>
         </div>
-        {change !== undefined && (
-          <div className={`flex items-center gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-            <span className="text-sm font-medium">
-              {isPositive ? '+' : ''}{change}%
-            </span>
-          </div>
-        )}
-      </div>
-      <div>
-        <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-        <div className="text-sm text-gray-500">{title}</div>
-        {subtitle && <div className="text-xs text-gray-400 mt-1">{subtitle}</div>}
+        {/* Icon */}
+        <div 
+          className="w-[60px] h-[60px] flex items-center justify-center rounded-xl flex-shrink-0"
+          style={{ backgroundColor: iconBgColor ? iconBgColor : '#FDEDED' }}
+        >
+          <Icon style={{ color: iconColor ? iconColor : '#A63534' }} size={24} />
+        </div>
       </div>
     </div>
   );

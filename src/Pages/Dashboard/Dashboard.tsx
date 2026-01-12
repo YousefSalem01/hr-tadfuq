@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDashboard } from './hooks/useDashboard';
+import WelcomeHeader from './components/WelcomeHeader';
 import SummaryCards from './components/SummaryCards';
 import DepartmentDistribution from './components/DepartmentDistribution';
 import RecentActivitiesFeed from './components/RecentActivitiesFeed';
@@ -33,6 +34,9 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Welcome Header */}
+      <WelcomeHeader />
+
       {/* Summary Cards */}
       <SummaryCards summary={data?.summary || null} isLoading={isLoading} />
 
