@@ -33,6 +33,15 @@ export const API_ENDPOINTS = {
     LIST: '/api/branches',
     DETAIL: (id: string | number) => `/api/branches/${id}`,
   },
+
+  // Attendance endpoints
+  ATTENDANCE: {
+    LIST: '/api/attendance',
+    DETAIL: (id: string | number) => `/api/attendance/${id}`,
+    STATUSES: '/api/attendance/statuses',
+    IMPORT: '/api/attendance/import',
+    EXPORT: '/api/attendance/export',
+  },
 } as const;
 
 /**

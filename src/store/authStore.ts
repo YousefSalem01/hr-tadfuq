@@ -37,12 +37,10 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         const { accessToken, refreshToken, isAuthenticated } = get();
-        // Prevent infinite loops (e.g., interceptor calls logout after we've already cleared state)
         if (!accessToken && !refreshToken && !isAuthenticated) return;
 
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         try {
-          // Call logout without axios interceptors to avoid refresh/logout recursion
           if (accessToken) {
             const BASE_URL = import.meta.env.VITE_API_URL;
             await axios.post(

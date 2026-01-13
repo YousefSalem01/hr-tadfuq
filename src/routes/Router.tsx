@@ -4,7 +4,7 @@ import Header from '../components/Header/Header';
 import Login from '../Pages/Auth/Login/Login';
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import Employees from '../Pages/Employees/Employees';
-import Attendance from '../Pages/Attendance';
+import Attendance from '../Pages/Attendance/Attendance';
 import Leaves from '../Pages/Leaves';
 import Payroll from '../Pages/Payroll';
 import Advance from '../Pages/Advance';
