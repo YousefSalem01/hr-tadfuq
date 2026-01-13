@@ -1,18 +1,25 @@
 import { Download, Upload } from 'lucide-react';
+import { useMemo } from 'react';
 import { useAttendance } from './hooks/useAttendance';
 import SummaryCards from './components/SummaryCards';
 import WeeklyOverviewChart from './components/WeeklyOverviewChart';
 import AttendanceTable from './components/AttendanceTable';
 import AttendanceFilters from './components/AttendanceFilters';
 import HrButton from '../../uikit/HrButton/HrButton';
-import { mockAttendanceChartData } from '../../data/mock';
 import type { AttendanceChartItem } from './types';
 
 const Attendance = () => {
   const { attendance, pagination, filters, modals, actions } = useAttendance();
 
-  // TODO: Replace with real chart data from API when backend ready
-  const chartData: AttendanceChartItem[] = mockAttendanceChartData;
+  // Calculate chart data from API summary
+  const chartData: AttendanceChartItem[] = useMemo(() => {
+    const stats = attendance.stats;
+    return [
+      { name: 'Present', value: stats.present, color: '#10B981' },
+      { name: 'Late', value: stats.late, color: '#F59E0B' },
+      { name: 'Absent', value: stats.absent, color: '#DC2626' },
+    ].filter(item => item.value > 0); // Only show non-zero values
+  }, [attendance.stats]);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -43,10 +50,8 @@ const Attendance = () => {
       {/* Weekly Overview Chart */}
       <WeeklyOverviewChart
         data={chartData}
-        selectedDate={filters.selectedDate || 'Today'}
-        onDateClick={() => {
-          // TODO: Open date picker or handle date selection
-        }}
+        startDate={filters.startDate}
+        endDate={filters.endDate}
       />
 
       {/* Attendance Table with Filters */}
@@ -65,8 +70,12 @@ const Attendance = () => {
             selectedDepartment={filters.selectedDepartment}
             selectedStatus={filters.selectedStatus}
             statusOptions={filters.statusOptions}
+            startDate={filters.startDate}
+            endDate={filters.endDate}
             onDepartmentFilter={filters.onDepartmentFilter}
             onStatusFilter={filters.onStatusFilter}
+            onStartDateFilter={filters.onStartDateFilter}
+            onEndDateFilter={filters.onEndDateFilter}
           />
         }
       />

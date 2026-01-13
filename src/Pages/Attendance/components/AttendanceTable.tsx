@@ -2,13 +2,10 @@ import { useMemo, ReactNode } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import HrTable from '../../../uikit/HrTable/HrTable';
 import { getStatusBadgeColor } from '../../../utils';
-import { AttendanceRecord as MockAttendanceRecord } from '../../../data/mock';
-
-// TODO: Switch to API type when backend ready
-// import type { AttendanceRecord } from '../types';
+import type { AttendanceRecord } from '../types';
 
 interface AttendanceTableProps {
-  records: MockAttendanceRecord[];
+  records: AttendanceRecord[];
   isLoading: boolean;
   currentPage: number;
   pageSize: number;
@@ -32,14 +29,13 @@ const AttendanceTable = ({
   onSearchChange,
   rightActions,
 }: AttendanceTableProps) => {
-  // TODO: Update accessorKeys when switching to API types (employee_name, check_in, check_out)
-  const columns = useMemo<ColumnDef<MockAttendanceRecord>[]>(
+  const columns = useMemo<ColumnDef<AttendanceRecord>[]>(
     () => [
       {
-        accessorKey: 'employee',
+        accessorKey: 'employee_name',
         header: 'Employee',
         cell: ({ row }) => (
-          <span className="font-medium text-gray-900">{row.original.employee}</span>
+          <span className="font-medium text-gray-900">{row.original.employee_name}</span>
         ),
       },
       {
@@ -50,37 +46,45 @@ const AttendanceTable = ({
         ),
       },
       {
-        accessorKey: 'checkIn',
+        accessorKey: 'date',
+        header: 'Date',
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700">{row.original.date}</span>
+        ),
+      },
+      {
+        accessorKey: 'check_in',
         header: 'Check In',
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700">{row.original.checkIn || '-'}</span>
+          <span className="text-sm text-gray-700">{row.original.check_in || '-'}</span>
         ),
       },
       {
-        accessorKey: 'checkOut',
+        accessorKey: 'check_out',
         header: 'Check Out',
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700">{row.original.checkOut || '-'}</span>
+          <span className="text-sm text-gray-700">{row.original.check_out || '-'}</span>
         ),
       },
       {
-        accessorKey: 'hours',
+        accessorKey: 'hours_worked',
         header: 'Hours',
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-gray-900">{row.original.hours}</span>
+          <span className="text-sm font-medium text-gray-900">{row.original.hours_worked}</span>
         ),
       },
       {
-        accessorKey: 'status',
+        accessorKey: 'status_display',
         header: 'Status',
         cell: ({ row }) => {
           const status = row.original.status;
+          const statusDisplay = row.original.status_display;
           return (
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              {status}
+              {statusDisplay}
             </span>
           );
         },
@@ -90,7 +94,7 @@ const AttendanceTable = ({
   );
 
   return (
-    <HrTable<MockAttendanceRecord>
+    <HrTable<AttendanceRecord>
       columns={columns}
       data={records}
       isLoading={isLoading}

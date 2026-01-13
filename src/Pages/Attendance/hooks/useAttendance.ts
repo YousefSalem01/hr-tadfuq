@@ -1,32 +1,27 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAttendancePageState } from './useAttendancePageState';
 import { useAttendanceQuery } from './useAttendanceQuery';
 import { useAttendanceStatusesQuery } from './useAttendanceStatusesQuery';
 import { useAttendanceMutations } from './useAttendanceMutations';
-import {
-  mockAttendanceRecords,
-  mockAttendanceStats,
-  attendanceStatusFilterOptions,
-  AttendanceRecord as MockAttendanceRecord,
-} from '../../../data/mock';
+import { attendanceStatusFilterOptions } from '../../../data/mock';
+import type { AttendanceRecord } from '../types';
 
 /**
  * Facade hook for Attendance page.
  * Combines data fetching, mutations, and UI state.
- * Currently uses mock data; switch to real queries when backend ready.
  */
 export function useAttendance() {
   const pageState = useAttendancePageState();
   const { pagination, filters, modals, selection, actions } = pageState;
 
-  // TODO: Enable when backend ready
   const attendanceQuery = useAttendanceQuery({
     page: pagination.currentPage,
     limit: pagination.pageSize,
     search: filters.searchTerm || undefined,
     department: filters.selectedDepartment?.value,
     status: filters.selectedStatus?.value,
-    date: filters.selectedDate || undefined,
+    start: filters.startDate || undefined,
+    end: filters.endDate || undefined,
   });
 
   // TODO: Enable when backend ready
@@ -35,11 +30,20 @@ export function useAttendance() {
 
   const mutations = useAttendanceMutations();
 
-  // --- Derived data (using mock for now) ---
-  // TODO: Replace with attendanceQuery.data when backend ready
-  const items: MockAttendanceRecord[] = mockAttendanceRecords;
-  const stats = mockAttendanceStats;
-  const filteredCount = items.length;
+  // --- Derived data from API ---
+  const items: AttendanceRecord[] = attendanceQuery.data?.data?.items || [];
+  const apiSummary = attendanceQuery.data?.data?.summary;
+  const apiPagination = attendanceQuery.data?.data?.pagination;
+  
+  const stats = useMemo(() => ({
+    total: apiSummary?.total_records || 0,
+    present: apiSummary?.present_today || 0,
+    late: apiSummary?.late_today || 0,
+    remote: 0, // Not provided in API
+    absent: apiSummary?.absent_today || 0,
+  }), [apiSummary]);
+
+  const filteredCount = apiPagination?.total_records || 0;
   const isLoading = attendanceQuery.isLoading;
   const error = attendanceQuery.error?.message || null;
 
@@ -50,7 +54,6 @@ export function useAttendance() {
 
   const handleSubmitRecord = useCallback(
     async (data: Record<string, any>) => {
-      // TODO: Implement when backend ready
       if (modals.record.mode === 'edit' && selection.record) {
         await mutations.updateMutation.mutateAsync({ id: selection.record.id, patch: data });
       } else {
@@ -63,7 +66,6 @@ export function useAttendance() {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!selection.record) return;
-    // TODO: Implement when backend ready
     await mutations.deleteMutation.mutateAsync(selection.record.id);
     actions.closeDeleteModal();
   }, [selection.record, mutations, actions]);
@@ -92,10 +94,9 @@ export function useAttendance() {
     pagination: {
       currentPage: pagination.currentPage,
       pageSize: pagination.pageSize,
-      // TODO: Replace with data from API pagination when backend ready
-      totalPages: 1,
-      hasNext: false,
-      hasPrevious: false,
+      totalPages: apiPagination?.total_pages || 1,
+      hasNext: apiPagination?.has_next || false,
+      hasPrevious: apiPagination?.has_previous || false,
       onPageChange: pagination.onPageChange,
       onPageSizeChange: pagination.onPageSizeChange,
     },
@@ -104,12 +105,14 @@ export function useAttendance() {
       searchTerm: filters.searchTerm,
       selectedDepartment: filters.selectedDepartment,
       selectedStatus: filters.selectedStatus,
-      selectedDate: filters.selectedDate,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
       statusOptions,
       onSearchChange: filters.onSearchChange,
       onDepartmentFilter: filters.onDepartmentFilter,
       onStatusFilter: filters.onStatusFilter,
-      onDateFilter: filters.onDateFilter,
+      onStartDateFilter: filters.onStartDateFilter,
+      onEndDateFilter: filters.onEndDateFilter,
     },
 
     modals: {

@@ -4,30 +4,36 @@ import type { AttendanceChartItem } from '../types';
 
 interface WeeklyOverviewChartProps {
   data: AttendanceChartItem[];
-  selectedDate: string;
-  onDateClick?: () => void;
+    startDate?: string;
+  endDate?: string;
 }
 
-const WeeklyOverviewChart = ({ data, selectedDate, onDateClick }: WeeklyOverviewChartProps) => {
+const WeeklyOverviewChart = ({ data, startDate, endDate }: WeeklyOverviewChartProps) => {
   // Calculate total and percentage for center display
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const presentItem = data.find((d) => d.name.toLowerCase() === 'present');
   const presentPercent = total > 0 && presentItem ? Math.round((presentItem.value / total) * 100) : 0;
 
+  // Format date range display
+  const dateRangeDisplay = startDate && endDate 
+    ? `${startDate} - ${endDate}`
+    : startDate 
+    ? `From ${startDate}`
+    : endDate
+    ? `Until ${endDate}`
+    : 'All Time';
+
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Weekly Attendance Overview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">Attendance Overview</h3>
           <p className="text-sm text-gray-500">Staff participation across divisions</p>
         </div>
-        <button
-          onClick={onDateClick}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700">
           <Calendar size={16} />
-          {selectedDate || 'Today'}
-        </button>
+          {dateRangeDisplay}
+        </div>
       </div>
 
       <div className="flex items-center justify-center py-8">

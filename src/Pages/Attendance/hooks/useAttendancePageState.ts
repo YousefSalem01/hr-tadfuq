@@ -18,7 +18,8 @@ export function useAttendancePageState() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<AsyncSelectOption | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<Option<string> | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(''); // e.g. '2024-01-15'
+  const [startDate, setStartDate] = useState<string>(''); // e.g. '2026-01-01'
+  const [endDate, setEndDate] = useState<string>(''); // e.g. '2026-01-31'
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,8 +48,13 @@ export function useAttendancePageState() {
     setCurrentPage(1);
   }, []);
 
-  const handleDateFilter = useCallback((date: string) => {
-    setSelectedDate(date);
+  const handleStartDateFilter = useCallback((date: string) => {
+    setStartDate(date);
+    setCurrentPage(1);
+  }, []);
+
+  const handleEndDateFilter = useCallback((date: string) => {
+    setEndDate(date);
     setCurrentPage(1);
   }, []);
 
@@ -108,11 +114,13 @@ export function useAttendancePageState() {
       searchTerm,
       selectedDepartment,
       selectedStatus,
-      selectedDate,
+      startDate,
+      endDate,
       onSearchChange: handleSearchChange,
       onDepartmentFilter: handleDepartmentFilter,
       onStatusFilter: handleStatusFilter,
-      onDateFilter: handleDateFilter,
+      onStartDateFilter: handleStartDateFilter,
+      onEndDateFilter: handleEndDateFilter,
     },
     modals: {
       record: {

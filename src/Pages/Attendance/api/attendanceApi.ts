@@ -7,22 +7,23 @@ export interface ListAttendanceParams {
   limit?: number;
   search?: string;
   department?: number | string;
-  status?: number | string;
-  date?: string; // e.g. '2024-01-15' or date range
+  status?: string;
+  start?: string; // Start date e.g. '2026-01-01'
+  end?: string; // End date e.g. '2026-01-31'
 }
 
 /**
  * Fetch paginated attendance list with optional filters
  */
 export async function listAttendance(params: ListAttendanceParams): Promise<AttendanceResponse> {
-  // TODO: Replace mock with real API call when backend ready
   const query = buildQueryParams({
     page: params.page,
     limit: params.limit,
     search: params.search,
     department: params.department,
     status: params.status,
-    date: params.date,
+    start: params.start,
+    end: params.end,
   });
   const url = query ? `${API_ENDPOINTS.ATTENDANCE.LIST}?${query}` : API_ENDPOINTS.ATTENDANCE.LIST;
   return api.get<AttendanceResponse>(url);

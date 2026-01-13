@@ -1,26 +1,30 @@
 // Attendance record returned by API
 export interface AttendanceRecord {
   id: number;
-  employee_id: number;
+  employee: number;
   employee_name: string;
   department: string;
-  department_id: number | null;
+  branch: string;
+  date: string;
   check_in: string | null;
   check_out: string | null;
-  hours: string;
+  late_minutes: number;
+  overtime_hours: string;
+  hours_worked: string;
   status: string;
-  date: string;
-  created_at: string;
-  updated_at: string;
+  status_display: string;
+  notes: string;
 }
 
 // Summary stats from API
 export interface AttendanceSummary {
-  total: number;
-  present: number;
-  late: number;
-  remote: number;
-  absent: number;
+  total_records: number;
+  present_today: number;
+  absent_today: number;
+  late_today: number;
+  on_leave_today: number;
+  average_late_minutes: number;
+  total_overtime_hours: number;
 }
 
 // Pagination fields from API
