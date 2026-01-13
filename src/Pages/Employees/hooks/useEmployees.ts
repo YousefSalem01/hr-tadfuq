@@ -1,121 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api } from '../../../services/api';
-import { API_ENDPOINTS } from '../../../config/endpoints';
-import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
-import { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
-import { useAuthStore } from '../../../store/authStore';
+import { useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import type { Employee, EmployeesResponse, EmployeesData, EmployeeFormData } from '../types';
-
-interface StatusApiItem {
-  id: number;
-  name: string;
-}
-
-function normalizePhoneNumber(input: string) {
-  const trimmed = (input ?? '').trim();
-  if (!trimmed) return '';
-  return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
-}
+import { useAuthStore } from '../../../store/authStore';
+import type { EmployeeFormData } from '../types';
+import { useEmployeesPageState } from './useEmployeesPageState';
+import { useEmployeesQuery } from './useEmployeesQuery';
+import { useEmployeeStatusesQuery } from './useEmployeeStatusesQuery';
+import { useEmployeeMutations } from './useEmployeeMutations';
+import { mapApiErrorsToForm, toCreatePayload, toUpdatePatch } from '../utils/employeeMappers';
 
 export const useEmployees = () => {
-  const [data, setData] = useState<EmployeesData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState<AsyncSelectOption | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<Option<number> | null>(null);
-  const [statusOptions, setStatusOptions] = useState<Option<number>[]>([]);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
-  const [submitEmployeeError, setSubmitEmployeeError] = useState<string | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const userRole = useAuthStore((state) => state.user?.role);
 
-  // Initial load: fetch employees and statuses in parallel
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      setError(null);
+  const pageState = useEmployeesPageState();
+  const { createMutation, updateMutation, deleteMutation, importMutation, exportMutation } = useEmployeeMutations();
 
-      try {
-        const [employeesRes, statusesRes] = await Promise.all([
-          api.get<EmployeesResponse>(
-            `${API_ENDPOINTS.EMPLOYEES.LIST}?page=${currentPage}&limit=${pageSize}`
-          ),
-          api.get<StatusApiItem[]>(API_ENDPOINTS.EMPLOYEES.STATUSES),
-        ]);
+  const employeesQuery = useEmployeesQuery({
+    page: pageState.paginationState.currentPage,
+    limit: pageState.paginationState.pageSize,
+    search: pageState.filtersState.searchTerm || undefined,
+    department: pageState.filtersState.selectedDepartment?.value || undefined,
+    status: pageState.filtersState.selectedStatus?.value || undefined,
+  });
 
-        // Handle employees response
-        if (employeesRes.success) {
-          setData(employeesRes.data);
-        } else {
-          setError(employeesRes.message || 'Failed to fetch employees');
-        }
+  const statusesQuery = useEmployeeStatusesQuery();
 
-        // Handle statuses response
-        if (Array.isArray(statusesRes)) {
-          const options: Option<number>[] = statusesRes.map((status) => ({
-            value: status.id,
-            label: status.name,
-          }));
-          setStatusOptions(options);
-        }
-      } catch (err: any) {
-        console.error('Initial data fetch error:', err);
-        setError(err.response?.data?.message || err.message || 'Failed to fetch data');
-      } finally {
-        setIsLoading(false);
-        setIsInitialLoad(false);
-      }
-    };
-
-    fetchInitialData();
-  }, []);
-
-  // Fetch employees when filters/pagination change (skip initial load)
-  const fetchEmployees = useCallback(async () => {
-    if (isInitialLoad) return;
-    
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      const departmentParam = selectedDepartment?.value ? `&department=${selectedDepartment.value}` : '';
-      const statusParam = selectedStatus?.value ? `&status=${selectedStatus.value}` : '';
-      
-      const response = await api.get<EmployeesResponse>(
-        `${API_ENDPOINTS.EMPLOYEES.LIST}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
-      );
-
-      if (response.success) {
-        setData(response.data);
-      } else {
-        setError(response.message || 'Failed to fetch employees');
-      }
-    } catch (err: any) {
-      console.error('Employees fetch error:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to fetch employees');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, pageSize, searchTerm, selectedDepartment, selectedStatus, isInitialLoad]);
-
-  useEffect(() => {
-    if (!isInitialLoad) {
-      fetchEmployees();
-    }
-  }, [fetchEmployees, isInitialLoad]);
+  const data = employeesQuery.data;
+  const isLoading = employeesQuery.isLoading || employeesQuery.isFetching;
+  const error = (employeesQuery.error as any)?.message || null;
 
   // Derived stats from API response
   const stats = {
@@ -125,279 +36,51 @@ export const useEmployees = () => {
     inactive: data?.summary.inactive_employees || 0,
   };
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  }, []);
-
-  const handleDepartmentFilter = useCallback((option: AsyncSelectOption | null) => {
-    setSelectedDepartment(option);
-    setCurrentPage(1);
-  }, []);
-
-  const handleStatusFilter = useCallback((option: Option<number> | readonly Option<number>[] | null) => {
-    const next = Array.isArray(option) ? null : (option as Option<number> | null);
-    setSelectedStatus(next?.value ? next : null);
-    setCurrentPage(1);
-  }, []);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
-
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-  }, []);
-
-  const handleSubmitEmployee = useCallback(
+  const submitEmployee = useCallback(
     async (employeeData: EmployeeFormData, setFormError?: (field: string, message: string) => void) => {
-      setSubmitEmployeeError(null);
-      setIsSubmittingEmployee(true);
-
       try {
-        let payload: any;
-        let response: any;
+        if (pageState.modalsState.employee.mode === 'edit' && employeeData.id && pageState.selectionState.employee) {
+          const selectedEmployee = pageState.selectionState.employee;
+          const changes = toUpdatePatch(employeeData, selectedEmployee);
 
-        if (modalMode === 'edit' && employeeData.id && selectedEmployee) {
-          // For PATCH: Only send changed fields
-          const changes: any = {};
-          
-          // Compare and add only changed fields
-          if (employeeData.fullName !== selectedEmployee.employee_name) {
-            changes.full_name = employeeData.fullName;
-          }
-          if (employeeData.email !== selectedEmployee.email) {
-            changes.email = employeeData.email;
-          }
-          if (employeeData.role !== selectedEmployee.role) {
-            changes.role = employeeData.role;
-          }
-          if (normalizePhoneNumber(employeeData.phoneNumber) !== selectedEmployee.phone_number) {
-            changes.phone_number = normalizePhoneNumber(employeeData.phoneNumber);
-          }
-          if (Number(employeeData.salary) !== Number(selectedEmployee.salary)) {
-            changes.salary = employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
-              ? undefined
-              : Number(employeeData.salary);
-          }
-          if (employeeData.salaryCurrency !== selectedEmployee.salary_currency) {
-            changes.salary_currency = employeeData.salaryCurrency || 'USD';
-          }
-          if (employeeData.joinDate !== selectedEmployee.join_date) {
-            changes.join_date = employeeData.joinDate;
-          }
-          if (employeeData.address !== selectedEmployee.address) {
-            changes.address = employeeData.address;
-          }
-          if (employeeData.emergencyContact !== selectedEmployee.emergency_contact) {
-            changes.emergency_contact = employeeData.emergencyContact;
-          }
-          if (employeeData.department !== selectedEmployee.department) {
-            changes.department = employeeData.department ?? null;
-          }
-          if (employeeData.branch !== selectedEmployee.branch) {
-            changes.branch = employeeData.branch ?? null;
-          }
-
-          // Only send request if there are changes
           if (Object.keys(changes).length === 0) {
             toast('No changes detected');
-            setIsModalOpen(false);
-            setSelectedEmployee(null);
-            setIsSubmittingEmployee(false);
+            pageState.actions.closeEmployeeModal();
             return;
           }
 
-          response = await api.patch<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(employeeData.id), changes);
-        } else {
-          // For POST: Send all fields
-          payload = {
-            full_name: employeeData.fullName,
-            email: employeeData.email,
-            role: employeeData.role,
-            user_role: userRole,
-            phone_number: normalizePhoneNumber(employeeData.phoneNumber),
-            salary:
-              employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
-                ? undefined
-                : Number(employeeData.salary),
-            salary_currency: employeeData.salaryCurrency || 'USD',
-            join_date: employeeData.joinDate,
-            address: employeeData.address,
-            emergency_contact: employeeData.emergencyContact,
-            department: employeeData.department ?? null,
-            branch: employeeData.branch ?? null,
-          };
-
-          response = await api.post<any>(API_ENDPOINTS.EMPLOYEES.LIST, payload);
+          await updateMutation.mutateAsync({ id: employeeData.id, patch: changes });
+          pageState.actions.closeEmployeeModal();
+          return;
         }
 
-        if (response && typeof response === 'object' && 'success' in response && response.success === false) {
-          throw new Error((response as any).message || 'Failed to save employee');
-        }
-
-        const successMessage = response.message;
-        toast.success(successMessage);
-
-        setIsModalOpen(false);
-        setSelectedEmployee(null);
-        fetchEmployees();
+        await createMutation.mutateAsync(toCreatePayload(employeeData, userRole));
+        pageState.actions.closeEmployeeModal();
       } catch (err: any) {
-        console.error('Employee submit error:', err);
-        
-        // Handle field-specific validation errors
-        if (err.response?.data?.errors && setFormError) {
-          const apiErrors = err.response.data.errors;
-          const fieldMap: Record<string, string> = {
-            'full_name': 'fullName',
-            'email': 'email',
-            'role': 'role',
-            'phone_number': 'phoneNumber',
-            'salary': 'salary',
-            'join_date': 'joinDate',
-            'address': 'address',
-            'emergency_contact': 'emergencyContact',
-            'department': 'department',
-            'branch': 'branch',
-          };
-
-          Object.keys(apiErrors).forEach((field) => {
-            const message = Array.isArray(apiErrors[field]) 
-              ? apiErrors[field][0] 
-              : apiErrors[field];
-            const formField = fieldMap[field] || field;
-            setFormError(formField, message);
-          });
-        } else {
-          // Handle general errors
-          const msg = err.response?.data?.message || err.message || 'Failed to save employee';
-          setSubmitEmployeeError(msg);
-          toast.error(msg);
-        }
-      } finally {
-        setIsSubmittingEmployee(false);
+        mapApiErrorsToForm(err, setFormError);
       }
     },
-    [fetchEmployees, modalMode, userRole, selectedEmployee]
+    [createMutation, updateMutation, pageState, userRole]
   );
 
-  const handleDeleteClick = useCallback((employee: Employee) => {
-    setSelectedEmployee(employee);
-    setIsDeleteModalOpen(true);
-  }, []);
-
-  const handleDeleteConfirm = useCallback(async () => {
+  const deleteConfirm = useCallback(async () => {
+    const selectedEmployee = pageState.selectionState.employee;
     if (!selectedEmployee) return;
+    await deleteMutation.mutateAsync(selectedEmployee.id);
+    pageState.actions.closeDeleteModal();
+  }, [deleteMutation, pageState]);
 
-    try {
-      const response = await api.delete<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(selectedEmployee.id));
+  const importEmployees = useCallback(
+    async (file: File) => {
+      await importMutation.mutateAsync(file);
+      pageState.actions.closeImportModal();
+    },
+    [importMutation, pageState]
+  );
 
-      if (response && typeof response === 'object' && 'success' in response && response.success === false) {
-        throw new Error((response as any).message || 'Failed to delete employee');
-      }
-
-      toast.success(response.message || 'Employee deleted successfully');
-      setIsDeleteModalOpen(false);
-      setSelectedEmployee(null);
-      fetchEmployees();
-    } catch (err: any) {
-      console.error('Delete employee error:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Failed to delete employee';
-      toast.error(errorMsg);
-    }
-  }, [selectedEmployee, fetchEmployees]);
-
-  const openAddModal = useCallback(() => {
-    setSelectedEmployee(null);
-    setModalMode('add');
-    setSubmitEmployeeError(null);
-    setIsModalOpen(true);
-  }, []);
-
-  const openEditModal = useCallback((employee: Employee) => {
-    setSelectedEmployee(employee);
-    setModalMode('edit');
-    setSubmitEmployeeError(null);
-    setIsModalOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedEmployee(null);
-    setSubmitEmployeeError(null);
-  }, []);
-  const closeDeleteModal = useCallback(() => {
-    setIsDeleteModalOpen(false);
-    setSelectedEmployee(null);
-  }, []);
-
-  const openImportModal = useCallback(() => {
-    setImportError(null);
-    setIsImportModalOpen(true);
-  }, []);
-
-  const closeImportModal = useCallback(() => {
-    setIsImportModalOpen(false);
-    setImportError(null);
-  }, []);
-
-  const handleImportEmployees = useCallback(async (file: File) => {
-    setIsImporting(true);
-    setImportError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      await api.postFormData(API_ENDPOINTS.EMPLOYEES.IMPORT, formData);
-      setIsImportModalOpen(false);
-      fetchEmployees();
-    } catch (err: any) {
-      console.error('Import error:', err);
-      setImportError(err.response?.data?.message || err.message || 'Failed to import employees');
-    } finally {
-      setIsImporting(false);
-    }
-  }, [fetchEmployees]);
-
-  const handleExportEmployees = useCallback(async () => {
-    setIsExporting(true);
-
-    try {
-      const response = await api.get<{
-        success: boolean;
-        message: string;
-        data: {
-          download_url: string;
-          filename: string;
-          format: string;
-          total_records: number;
-        };
-      }>(API_ENDPOINTS.EMPLOYEES.EXPORT);
-
-      if (response.success && response.data.download_url) {
-        // Create a temporary anchor element to trigger download
-        const link = document.createElement('a');
-        link.href = response.data.download_url;
-        link.download = response.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Show success message
-        toast.success(response.message || `Successfully exported ${response.data.total_records} employees`);
-      } else {
-        throw new Error(response.message || 'Failed to export employees');
-      }
-    } catch (err: any) {
-      console.error('Export error:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Failed to export employees';
-      toast.error(errorMsg);
-    } finally {
-      setIsExporting(false);
-    }
-  }, []);
+  const exportEmployeesAction = useCallback(async () => {
+    await exportMutation.mutateAsync();
+  }, [exportMutation]);
 
   return {
     employees: {
@@ -409,63 +92,64 @@ export const useEmployees = () => {
     },
 
     pagination: {
-      currentPage: data?.pagination.current_page || 1,
-      pageSize: data?.pagination.limit || 10,
+      currentPage: pageState.paginationState.currentPage,
+      pageSize: pageState.paginationState.pageSize,
       totalPages: data?.pagination.total_pages || 1,
       hasNext: data?.pagination.has_next || false,
       hasPrevious: data?.pagination.has_previous || false,
-      onPageChange: handlePageChange,
-      onPageSizeChange: handlePageSizeChange,
+      onPageChange: pageState.paginationState.onPageChange,
+      onPageSizeChange: pageState.paginationState.onPageSizeChange,
     },
 
     filters: {
-      searchTerm,
-      selectedDepartment,
-      selectedStatus,
-      statusOptions,
-      onSearchChange: handleSearchChange,
-      onDepartmentFilter: handleDepartmentFilter,
-      onStatusFilter: handleStatusFilter,
+      searchTerm: pageState.filtersState.searchTerm,
+      selectedDepartment: pageState.filtersState.selectedDepartment,
+      selectedStatus: pageState.filtersState.selectedStatus,
+      statusOptions: statusesQuery.data || [],
+      onSearchChange: pageState.filtersState.onSearchChange,
+      onDepartmentFilter: pageState.filtersState.onDepartmentFilter,
+      onStatusFilter: pageState.filtersState.onStatusFilter,
     },
 
     modals: {
       employee: {
-        isOpen: isModalOpen,
-        mode: modalMode,
-        isSubmitting: isSubmittingEmployee,
-        error: submitEmployeeError,
+        isOpen: pageState.modalsState.employee.isOpen,
+        mode: pageState.modalsState.employee.mode,
+        isSubmitting:
+          pageState.modalsState.employee.mode === 'edit' ? updateMutation.isPending : createMutation.isPending,
+        error: null,
       },
       delete: {
-        isOpen: isDeleteModalOpen,
+        isOpen: pageState.modalsState.delete.isOpen,
       },
       import: {
-        isOpen: isImportModalOpen,
-        isLoading: isImporting,
-        error: importError,
+        isOpen: pageState.modalsState.import.isOpen,
+        isLoading: importMutation.isPending,
+        error: (importMutation.error as any)?.response?.data?.message || (importMutation.error as any)?.message || null,
       },
       export: {
-        isLoading: isExporting,
+        isLoading: exportMutation.isPending,
       },
     },
 
     selection: {
-      employee: selectedEmployee,
+      employee: pageState.selectionState.employee,
     },
 
     actions: {
-      openAddModal,
-      openEditModal,
-      closeEmployeeModal: closeModal,
-      closeDeleteModal,
-      openImportModal,
-      closeImportModal,
+      openAddModal: pageState.actions.openAddModal,
+      openEditModal: pageState.actions.openEditModal,
+      closeEmployeeModal: pageState.actions.closeEmployeeModal,
+      closeDeleteModal: pageState.actions.closeDeleteModal,
+      openImportModal: pageState.actions.openImportModal,
+      closeImportModal: pageState.actions.closeImportModal,
 
-      submitEmployee: handleSubmitEmployee,
-      deleteClick: handleDeleteClick,
-      deleteConfirm: handleDeleteConfirm,
-      importEmployees: handleImportEmployees,
-      exportEmployees: handleExportEmployees,
-      refetch: fetchEmployees,
+      submitEmployee,
+      deleteClick: pageState.actions.deleteClick,
+      deleteConfirm,
+      importEmployees,
+      exportEmployees: exportEmployeesAction,
+      refetch: employeesQuery.refetch,
     },
   };
 };

@@ -5,6 +5,7 @@ import HrButton from '../../../uikit/HrButton/HrButton';
 import HrInput from '../../../uikit/HrInput/HrInput';
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
+import HrModal from '../../../uikit/HrModal/HrModal';
 import { currencyOptions, phoneCountryOptions } from '../../../data/mock';
 import { API_ENDPOINTS } from '../../../config/endpoints';
 import {
@@ -124,8 +125,10 @@ const EmployeeModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <HrModal
+      isOpen={isOpen}
+      containerClassName="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+    >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
@@ -164,7 +167,7 @@ const EmployeeModal = ({
             );
           })}
           className="p-6"
-        >
+        > 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">
@@ -342,8 +345,7 @@ const EmployeeModal = ({
             </HrButton>
           </div>
         </form>
-      </div>
-    </div>
+    </HrModal>
   );
 };
 
