@@ -166,6 +166,7 @@ export const useEmployees = () => {
             employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
               ? undefined
               : Number(employeeData.salary),
+          salary_currency: employeeData.salaryCurrency || 'USD',
           join_date: employeeData.joinDate,
           address: employeeData.address,
           emergency_contact: employeeData.emergencyContact,
@@ -190,6 +191,10 @@ export const useEmployees = () => {
         fetchEmployees();
       } catch (err: any) {
         console.error('Employee submit error:', err);
+        if (err.response?.data?.errors) {
+          setIsSubmittingEmployee(false);
+          throw err;
+        }
         const msg = err.response?.data?.message || err.message || 'Failed to save employee';
         setSubmitEmployeeError(msg);
         toast.error(msg);

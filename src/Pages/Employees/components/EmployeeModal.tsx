@@ -18,7 +18,7 @@ import type { Employee } from '../types';
 interface EmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (employee: any) => void;
+  onSubmit: (employee: any) => Promise<void>;
   employee?: Employee | null;
   mode?: 'add' | 'edit';
   isSubmitting?: boolean;
@@ -71,6 +71,7 @@ const EmployeeModal = ({
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors },
   } = useForm<EmployeeFormValues>({
     defaultValues: getInitialFormData(),
@@ -93,6 +94,10 @@ const EmployeeModal = ({
       const country = guessCountryFromPhone(employee.phone_number);
       const dialCode = COUNTRY_DIAL_CODES[country] ?? COUNTRY_DIAL_CODES.US;
       
+      const employeeCurrency = employee.salary_currency 
+        ? currencyOptions.find((o) => o.value === employee.salary_currency) || currencyOptions[0]
+        : currencyOptions[0];
+      
       reset({
         fullName: employee.employee_name || '',
         email: employee.email || '',
@@ -105,7 +110,7 @@ const EmployeeModal = ({
         address: employee.address || '',
         emergencyContact: employee.emergency_contact || '',
         salary: employee.salary || '',
-        salaryCurrency: currencyOptions[0] as Option<string>,
+        salaryCurrency: employeeCurrency as Option<string>,
         branch: branch,
       });
     } else if (isOpen && !isEditMode) {
@@ -143,25 +148,49 @@ const EmployeeModal = ({
 
         {/* Form */}
         <form
-          onSubmit={handleSubmit((values) => {
-            const dialCode = COUNTRY_DIAL_CODES[values.phoneCountry.value] ?? '';
-            onSubmit({
-              ...values,
-              id: employee?.id,
-              department: values.department?.value || null,
-              branch: values.branch?.value || null,
-              phoneCountry: values.phoneCountry.value,
-              salaryCurrency: values.salaryCurrency.value,
-              phoneNumber: `${dialCode}${values.phoneNumber}`,
-            });
+          onSubmit={handleSubmit(async (values) => {
+            try {
+              const dialCode = COUNTRY_DIAL_CODES[values.phoneCountry.value] ?? '';
+              await onSubmit({
+                ...values,
+                id: employee?.id,
+                department: values.department?.value || null,
+                branch: values.branch?.value || null,
+                phoneCountry: values.phoneCountry.value,
+                salaryCurrency: values.salaryCurrency.value,
+                phoneNumber: `${dialCode}${values.phoneNumber}`,
+              });
+            } catch (err: any) {
+              // Handle field-specific errors from API
+              if (err.response?.data?.errors) {
+                const apiErrors = err.response.data.errors;
+                Object.keys(apiErrors).forEach((field) => {
+                  const message = Array.isArray(apiErrors[field]) 
+                    ? apiErrors[field][0] 
+                    : apiErrors[field];
+                  
+                  // Map API field names to form field names
+                  const fieldMap: Record<string, any> = {
+                    'full_name': 'fullName',
+                    'email': 'email',
+                    'role': 'role',
+                    'phone_number': 'phoneNumber',
+                    'salary': 'salary',
+                    'join_date': 'joinDate',
+                    'address': 'address',
+                    'emergency_contact': 'emergencyContact',
+                    'department': 'department',
+                    'branch': 'branch',
+                  };
+                  
+                  const formField = fieldMap[field] || field;
+                  setError(formField, { type: 'manual', message });
+                });
+              }
+            }
           })}
           className="p-6"
         >
-          {error ? (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">

@@ -24,6 +24,7 @@ export interface Employee {
   branch: number | null;
   join_date: string | null;
   salary: string;
+  salary_currency: string;
   phone_number: string;
   address: string;
   emergency_contact: string;
@@ -76,6 +77,7 @@ export type EmployeeFormData = {
   role: string;
   phoneNumber: string;
   salary: string | number;
+  salaryCurrency: string;
   joinDate: string;
   address: string;
   emergencyContact: string;
