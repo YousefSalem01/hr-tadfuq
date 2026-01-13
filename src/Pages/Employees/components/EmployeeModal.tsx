@@ -5,7 +5,7 @@ import HrInput from '../../../uikit/HrInput/HrInput';
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import { currencyOptions, phoneCountryOptions } from '../../../data/mock';
-import { endpoints } from '../../../config/endpoints';
+import { API_ENDPOINTS } from '../../../config/endpoints';
 import type { Employee } from '../types';
 
 interface EmployeeModalProps {
@@ -233,7 +233,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 name="department"
                 label="Department"
                 placeholder="Select Department"
-                endpoint={endpoints.departments}
+                endpoint={API_ENDPOINTS.DEPARTMENTS.LIST}
                 dataKey="items"
                 labelKey="name"
                 value={formData.department}
@@ -271,7 +271,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 name="branch"
                 label="Branch"
                 placeholder="Select Branch"
-                endpoint={endpoints.branches}
+                endpoint={API_ENDPOINTS.BRANCHES.LIST}
                 dataKey="items"
                 labelKey="name"
                 value={formData.branch}

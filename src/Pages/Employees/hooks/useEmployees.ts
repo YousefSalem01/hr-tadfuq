@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../../services/api';
-import { endpoints } from '../../../config/endpoints';
+import { API_ENDPOINTS } from '../../../config/endpoints';
 import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import type { Employee, EmployeesResponse, EmployeesData } from '../types';
@@ -38,9 +38,9 @@ export const useEmployees = () => {
       try {
         const [employeesRes, statusesRes] = await Promise.all([
           api.get<EmployeesResponse>(
-            `${endpoints.employees.list}?page=${currentPage}&limit=${pageSize}`
+            `${API_ENDPOINTS.EMPLOYEES.LIST}?page=${currentPage}&limit=${pageSize}`
           ),
-          api.get<StatusApiItem[]>(endpoints.employees.statuses),
+          api.get<StatusApiItem[]>(API_ENDPOINTS.EMPLOYEES.STATUSES),
         ]);
 
         // Handle employees response
@@ -83,7 +83,7 @@ export const useEmployees = () => {
       const statusParam = selectedStatus?.value ? `&status=${selectedStatus.value}` : '';
       
       const response = await api.get<EmployeesResponse>(
-        `${endpoints.employees.list}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
+        `${API_ENDPOINTS.EMPLOYEES.LIST}?page=${currentPage}&limit=${pageSize}${searchParam}${departmentParam}${statusParam}`
       );
 
       if (response.success) {
@@ -198,7 +198,7 @@ export const useEmployees = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      await api.postFormData(endpoints.employees.import, formData);
+      await api.postFormData(API_ENDPOINTS.EMPLOYEES.IMPORT, formData);
       setIsImportModalOpen(false);
       fetchEmployees();
     } catch (err: any) {
@@ -210,51 +210,66 @@ export const useEmployees = () => {
   }, [fetchEmployees]);
 
   return {
-    // Data
-    employees: data?.items || [],
-    stats,
-    filteredCount: data?.pagination.total_records || 0,
-    isLoading,
-    error,
-    
-    // Pagination
-    currentPage: data?.pagination.current_page || 1,
-    pageSize: data?.pagination.limit || 10,
-    totalPages: data?.pagination.total_pages || 1,
-    hasNext: data?.pagination.has_next || false,
-    hasPrevious: data?.pagination.has_previous || false,
-    handlePageChange,
-    handlePageSizeChange,
-    
-    // Filters
-    searchTerm,
-    selectedDepartment,
-    selectedStatus,
-    statusOptions,
-    handleSearchChange,
-    handleDepartmentFilter,
-    handleStatusFilter,
-    
-    // Modals
-    isModalOpen,
-    modalMode,
-    isDeleteModalOpen,
-    isImportModalOpen,
-    isImporting,
-    importError,
-    selectedEmployee,
-    openAddModal,
-    openEditModal,
-    closeModal,
-    closeDeleteModal,
-    openImportModal,
-    closeImportModal,
-    handleImportEmployees,
-    
-    // Actions
-    handleSubmitEmployee,
-    handleDeleteClick,
-    handleDeleteConfirm,
-    refetch: fetchEmployees,
+    employees: {
+      items: data?.items || [],
+      stats,
+      filteredCount: data?.pagination.total_records || 0,
+      isLoading,
+      error,
+    },
+
+    pagination: {
+      currentPage: data?.pagination.current_page || 1,
+      pageSize: data?.pagination.limit || 10,
+      totalPages: data?.pagination.total_pages || 1,
+      hasNext: data?.pagination.has_next || false,
+      hasPrevious: data?.pagination.has_previous || false,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    },
+
+    filters: {
+      searchTerm,
+      selectedDepartment,
+      selectedStatus,
+      statusOptions,
+      onSearchChange: handleSearchChange,
+      onDepartmentFilter: handleDepartmentFilter,
+      onStatusFilter: handleStatusFilter,
+    },
+
+    modals: {
+      employee: {
+        isOpen: isModalOpen,
+        mode: modalMode,
+      },
+      delete: {
+        isOpen: isDeleteModalOpen,
+      },
+      import: {
+        isOpen: isImportModalOpen,
+        isLoading: isImporting,
+        error: importError,
+      },
+    },
+
+    selection: {
+      employee: selectedEmployee,
+    },
+
+    actions: {
+      openAddModal,
+      openEditModal,
+      closeEmployeeModal: closeModal,
+      closeDeleteModal,
+      openImportModal,
+      closeImportModal,
+
+      submitEmployee: handleSubmitEmployee,
+      deleteClick: handleDeleteClick,
+      deleteConfirm: handleDeleteConfirm,
+      importEmployees: handleImportEmployees,
+      refetch: fetchEmployees,
+    },
   };
 };

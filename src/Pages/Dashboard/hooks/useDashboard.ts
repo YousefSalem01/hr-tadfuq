@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../../services/api';
-import { endpoints } from '../../../config/endpoints';
+import { API_ENDPOINTS } from '../../../config/endpoints';
 import type { DashboardResponse, DashboardData } from '../types';
 
 export const useDashboard = () => {
@@ -18,7 +18,7 @@ export const useDashboard = () => {
     try {
       const searchParam = searchValue ? `&search=${encodeURIComponent(searchValue)}` : '';
       const response = await api.get<DashboardResponse>(
-        `${endpoints.dashboard}?page=${currentPage}&limit=${pageSize}${searchParam}`
+        `${API_ENDPOINTS.DASHBOARD}?page=${currentPage}&limit=${pageSize}${searchParam}`
       );
 
       if (response.success) {

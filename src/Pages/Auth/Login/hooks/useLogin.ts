@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../../services/api';
-import { endpoints } from '../../../../config/endpoints';
+import { API_ENDPOINTS } from '../../../../config/endpoints';
 import { useAuthStore } from '../../../../store/authStore';
 import type { LoginFormData } from '../types';
 
@@ -32,7 +32,7 @@ export const useLogin = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post<LoginResponse>(endpoints.auth.login, {
+      const response = await api.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, {
         email: data.email,
         password: data.password,
       });

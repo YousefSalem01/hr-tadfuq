@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../store/authStore';
-import { endpoints } from '../config/endpoints';
+import { API_ENDPOINTS } from '../config/endpoints';
 
 // Always use the direct API URL
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -40,7 +40,7 @@ apiClient.interceptors.response.use(
         if (!refreshToken) throw new Error('No refresh token');
 
         // Refresh token
-        const response = await axios.post(`${BASE_URL}${endpoints.auth.refresh}`, {
+        const response = await axios.post(`${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`, {
           refresh: refreshToken,
         });
 

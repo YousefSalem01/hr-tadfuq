@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { api } from '../services/api';
-import { endpoints } from '../config/endpoints';
+import { API_ENDPOINTS } from '../config/endpoints';
 
 interface User {
   id: number;
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await api.post(endpoints.auth.logout);
+          await api.post(API_ENDPOINTS.AUTH.LOGOUT);
         } catch (error) {
           console.error('Logout error:', error);
         } finally {

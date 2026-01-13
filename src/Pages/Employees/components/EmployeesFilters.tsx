@@ -1,6 +1,6 @@
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
-import { endpoints } from '../../../config/endpoints';
+import { API_ENDPOINTS } from '../../../config/endpoints';
 
 interface EmployeesFiltersProps {
   selectedDepartment: AsyncSelectOption | null;
@@ -25,7 +25,7 @@ const EmployeesFilters = ({
           placeholder="All Departments"
           value={selectedDepartment}
           onChange={onDepartmentFilter}
-          endpoint={endpoints.departments}
+          endpoint={API_ENDPOINTS.DEPARTMENTS.LIST}
           dataKey="items"
           labelKey="name"
         />

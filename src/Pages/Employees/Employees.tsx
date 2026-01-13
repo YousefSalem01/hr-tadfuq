@@ -9,40 +9,7 @@ import HrConfirmationModal from '../../uikit/HrConfirmationModal/HrConfirmationM
 import ImportEmployeesModal from './components/ImportEmployeesModal';
 
 const Employees = () => {
-  const {
-    employees,
-    stats,
-    filteredCount,
-    isLoading,
-    currentPage,
-    pageSize,
-    handlePageChange,
-    handlePageSizeChange,
-    searchTerm,
-    selectedDepartment,
-    selectedStatus,
-    statusOptions,
-    handleSearchChange,
-    handleDepartmentFilter,
-    handleStatusFilter,
-    isModalOpen,
-    modalMode,
-    isDeleteModalOpen,
-    isImportModalOpen,
-    isImporting,
-    importError,
-    selectedEmployee,
-    openAddModal,
-    openEditModal,
-    closeModal,
-    closeDeleteModal,
-    openImportModal,
-    closeImportModal,
-    handleImportEmployees,
-    handleSubmitEmployee,
-    handleDeleteClick,
-    handleDeleteConfirm,
-  } = useEmployees();
+  const { employees, pagination, filters, modals, selection, actions } = useEmployees();
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -56,70 +23,70 @@ const Employees = () => {
           <HrButton variant="secondary" icon={Download}>
             Export Report
           </HrButton>
-          <HrButton variant="secondary" icon={Upload} onClick={openImportModal}>
+          <HrButton variant="secondary" icon={Upload} onClick={actions.openImportModal}>
             Import Data
           </HrButton>
-          <HrButton variant="primary" icon={Plus} onClick={openAddModal}>
+          <HrButton variant="primary" icon={Plus} onClick={actions.openAddModal}>
             Add Employee
           </HrButton>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <SummaryCards stats={stats} />
+      <SummaryCards stats={employees.stats} />
 
       {/* Employees Table with Filters */}
       <EmployeesTable
-        employees={employees}
-        isLoading={isLoading}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        totalItems={filteredCount}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        onEditClick={openEditModal}
-        onDeleteClick={handleDeleteClick}
-        searchValue={searchTerm}
-        onSearchChange={handleSearchChange}
+        employees={employees.items}
+        isLoading={employees.isLoading}
+        currentPage={pagination.currentPage}
+        pageSize={pagination.pageSize}
+        totalItems={employees.filteredCount}
+        onPageChange={pagination.onPageChange}
+        onPageSizeChange={pagination.onPageSizeChange}
+        onEditClick={actions.openEditModal}
+        onDeleteClick={actions.deleteClick}
+        searchValue={filters.searchTerm}
+        onSearchChange={filters.onSearchChange}
         rightActions={
           <EmployeesFilters
-            selectedDepartment={selectedDepartment}
-            selectedStatus={selectedStatus}
-            statusOptions={statusOptions}
-            onDepartmentFilter={handleDepartmentFilter}
-            onStatusFilter={handleStatusFilter}
+            selectedDepartment={filters.selectedDepartment}
+            selectedStatus={filters.selectedStatus}
+            statusOptions={filters.statusOptions}
+            onDepartmentFilter={filters.onDepartmentFilter}
+            onStatusFilter={filters.onStatusFilter}
           />
         }
       />
 
       {/* Employee Modal (Add/Edit) */}
       <EmployeeModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleSubmitEmployee}
-        employee={selectedEmployee}
-        mode={modalMode}
+        isOpen={modals.employee.isOpen}
+        onClose={actions.closeEmployeeModal}
+        onSubmit={actions.submitEmployee}
+        employee={selection.employee}
+        mode={modals.employee.mode}
       />
 
       {/* Delete Confirmation Modal */}
       <HrConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={closeDeleteModal}
-        onConfirm={handleDeleteConfirm}
+        isOpen={modals.delete.isOpen}
+        onClose={actions.closeDeleteModal}
+        onConfirm={actions.deleteConfirm}
         title="Delete Employee"
         message="Are you sure you want to delete"
-        itemName={selectedEmployee?.employee_name}
+        itemName={selection.employee?.employee_name}
         confirmText="Delete"
         type="danger"
       />
 
       {/* Import Employees Modal */}
       <ImportEmployeesModal
-        isOpen={isImportModalOpen}
-        onClose={closeImportModal}
-        onImport={handleImportEmployees}
-        isLoading={isImporting}
-        error={importError}
+        isOpen={modals.import.isOpen}
+        onClose={actions.closeImportModal}
+        onImport={actions.importEmployees}
+        isLoading={modals.import.isLoading}
+        error={modals.import.error}
       />
     </div>
   );
