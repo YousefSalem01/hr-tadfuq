@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { api } from '../services/api';
+import axios from 'axios';
 import { API_ENDPOINTS } from '../config/endpoints';
 
 interface User {
@@ -25,7 +25,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -36,9 +36,21 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        const { accessToken, refreshToken, isAuthenticated } = get();
+        // Prevent infinite loops (e.g., interceptor calls logout after we've already cleared state)
+        if (!accessToken && !refreshToken && !isAuthenticated) return;
+
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         try {
-          await api.post(API_ENDPOINTS.AUTH.LOGOUT);
+          // Call logout without axios interceptors to avoid refresh/logout recursion
+          if (accessToken) {
+            const BASE_URL = import.meta.env.VITE_API_URL;
+            await axios.post(
+              `${BASE_URL}${API_ENDPOINTS.AUTH.LOGOUT}`,
+              undefined,
+              { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+          }
         } catch (error) {
           console.error('Logout error:', error);
         }

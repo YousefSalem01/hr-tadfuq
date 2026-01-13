@@ -30,6 +30,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
+    const requestUrl: string = originalRequest?.url || '';
+    if (requestUrl.includes(API_ENDPOINTS.AUTH.LOGOUT)) {
+      return Promise.reject(error);
+    }
 
     // If 401 and not already retried
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -53,9 +57,14 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${access}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout
-        await useAuthStore.getState().logout();
-        window.location.href = '/login';
+        const { accessToken, refreshToken, isAuthenticated, logout } = useAuthStore.getState();
+        if (accessToken || refreshToken || isAuthenticated) {
+          await logout();
+        }
+
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
