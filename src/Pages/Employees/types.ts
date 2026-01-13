@@ -67,3 +67,18 @@ export interface EmployeesResponse {
   message: string;
   data: EmployeesData;
 }
+
+// Form payload used by Employees modal submit
+export type EmployeeFormData = {
+  id?: number;
+  fullName: string;
+  email: string;
+  role: string;
+  phoneNumber: string;
+  salary: string | number;
+  joinDate: string;
+  address: string;
+  emergencyContact: string;
+  department: number | string | null;
+  branch: number | string | null;
+};

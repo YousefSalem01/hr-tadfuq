@@ -4,6 +4,7 @@
 import { AsyncPaginate } from 'react-select-async-paginate';
 import { GroupBase, StylesConfig, OptionsOrGroups } from 'react-select';
 import { api } from '../../services/api';
+import { Control, Controller, RegisterOptions } from 'react-hook-form';
 
 export interface AsyncSelectOption {
   value: number;
@@ -18,24 +19,25 @@ export interface HrAsyncSelectMenuProps {
   name: string;
   label?: string;
   placeholder?: string;
-  value: AsyncSelectOption | null;
-  onChange: (value: AsyncSelectOption | null) => void;
   error?: string;
   endpoint: string;
   dataKey: string;
   labelKey?: string;
   pageSize?: number;
   required?: boolean;
+  control: Control<any>;
+  rules?: RegisterOptions;
+  onValueChange?: (value: AsyncSelectOption | null) => void;
 }
 
-const selectStyles: StylesConfig<AsyncSelectOption, false> = {
+const buildSelectStyles = (error?: string): StylesConfig<AsyncSelectOption, false> => ({
   control: (base, state) => ({
     ...base,
-    borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+    borderColor: error ? '#ef4444' : state.isFocused ? '#3b82f6' : '#d1d5db',
     boxShadow: 'none',
     minHeight: 42,
     '&:hover': {
-      borderColor: '#3b82f6',
+      borderColor: error ? '#ef4444' : '#3b82f6',
     },
   }),
   menuPortal: (base) => ({
@@ -46,21 +48,24 @@ const selectStyles: StylesConfig<AsyncSelectOption, false> = {
     ...base,
     zIndex: 9999,
   }),
-};
+});
 
 const HrAsyncSelectMenu = ({
   name,
   label,
   placeholder = 'Select...',
-  value,
-  onChange,
   error,
   endpoint,
   dataKey,
   labelKey = 'name',
   pageSize = 10,
   required = false,
+  control,
+  rules,
+  onValueChange,
 }: HrAsyncSelectMenuProps) => {
+  const selectStyles = buildSelectStyles(error);
+
   const loadOptions = async (
     search: string,
     _loadedOptions: OptionsOrGroups<AsyncSelectOption, GroupBase<AsyncSelectOption>>,
@@ -108,19 +113,31 @@ const HrAsyncSelectMenu = ({
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
-      <AsyncPaginate<AsyncSelectOption, GroupBase<AsyncSelectOption>, Additional>
-        inputId={name}
-        additional={{ page: 1 }}
-        value={value}
-        loadOptions={loadOptions}
-        onChange={(option) => onChange(option as AsyncSelectOption | null)}
-        placeholder={placeholder}
-        isClearable
-        debounceTimeout={400}
-        classNamePrefix="react-select"
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={selectStyles}
+      <Controller
+        name={name}
+        control={control}
+        rules={rules}
+        render={({ field }) => (
+          <AsyncPaginate<AsyncSelectOption, GroupBase<AsyncSelectOption>, Additional>
+            inputId={name}
+            additional={{ page: 1 }}
+            value={field.value}
+            loadOptions={loadOptions}
+            onChange={(option) => {
+              const next = option as AsyncSelectOption | null;
+              field.onChange(next);
+              onValueChange?.(next);
+            }}
+            onBlur={field.onBlur}
+            placeholder={placeholder}
+            isClearable
+            debounceTimeout={400}
+            classNamePrefix="react-select"
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
+            styles={selectStyles}
+          />
+        )}
       />
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>

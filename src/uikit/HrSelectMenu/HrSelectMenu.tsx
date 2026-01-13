@@ -1,4 +1,4 @@
-import Select, { Props as ReactSelectProps, MultiValue, SingleValue } from 'react-select';
+import Select, { Props as ReactSelectProps } from 'react-select';
 import { Control, Controller, RegisterOptions } from 'react-hook-form';
 
 export interface Option<TValue = string> {
@@ -18,25 +18,12 @@ interface BaseProps<TValue> {
   required?: boolean;
   helperText?: string;
   isDisabled?: boolean;
-}
-
-interface RHFProps<TValue> extends BaseProps<TValue> {
   control: Control<any>;
   rules?: RegisterOptions;
-  value?: never;
-  onChange?: never;
+  onValueChange?: (value: any) => void;
 }
 
-interface StandaloneProps<TValue> extends BaseProps<TValue> {
-  control?: never;
-  rules?: never;
-  value?: Option<TValue> | Option<TValue>[] | null;
-  onChange?: (
-    value: SingleValue<Option<TValue>> | MultiValue<Option<TValue>>
-  ) => void;
-}
-
-type HrSelectMenuProps<TValue> = (RHFProps<TValue> | StandaloneProps<TValue>) &
+type HrSelectMenuProps<TValue> = BaseProps<TValue> &
   Omit<ReactSelectProps, 'options' | 'isMulti' | 'isSearchable' | 'onChange' | 'value'>;
 
 const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
@@ -52,6 +39,9 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
     required = false,
     helperText,
     isDisabled,
+    control,
+    rules,
+    onValueChange,
     ...rest 
   } = props as any;
 
@@ -106,30 +96,11 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
     }),
   };
 
-  const SelectElement = (
-    <Select
-      inputId={name}
-      isMulti={isMulti}
-      isSearchable={isSearchable}
-      options={options}
-      classNamePrefix="react-select"
-      className={className}
-      placeholder={placeholder}
-      value={'value' in props ? props.value : undefined}
-      onChange={'onChange' in props ? props.onChange : undefined}
-      isDisabled={isDisabled}
-      menuPortalTarget={document.body}
-      menuPosition="fixed"
-      styles={customStyles}
-      {...(rest as any)}
-    />
-  );
-
-  const ControlledElement = 'control' in props && (props as any).control ? (
+  const ControlledElement = (
     <Controller
       name={name}
-      control={(props as any).control}
-      rules={(props as any).rules}
+      control={control}
+      rules={rules}
       render={({ field }) => (
         <Select
           inputId={name}
@@ -140,7 +111,10 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
           className={className}
           placeholder={placeholder}
           value={field.value}
-          onChange={field.onChange}
+          onChange={(v) => {
+            field.onChange(v);
+            onValueChange?.(v);
+          }}
           onBlur={field.onBlur}
           isDisabled={isDisabled}
           menuPortalTarget={document.body}
@@ -150,8 +124,6 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
         />
       )}
     />
-  ) : (
-    SelectElement
   );
 
   return (

@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState, useEffect, useRef } from 'react';
+import { ReactNode, useMemo, useEffect, useRef } from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -6,10 +6,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import HrButton from '../HrButton/HrButton';
 import HrInput from '../HrInput/HrInput';
 import HrSelectMenu, { Option } from '../HrSelectMenu/HrSelectMenu';
-import type { MultiValue, SingleValue } from 'react-select';
 
 export interface HrTableProps<TData> {
   title?: string;
@@ -75,18 +75,10 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
     showControls = true,
   } = props;
 
-  // Local state for immediate input display
-  const [localSearch, setLocalSearch] = useState(searchValue ?? '');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Sync local state when searchValue prop changes externally
-  useEffect(() => {
-    setLocalSearch(searchValue ?? '');
-  }, [searchValue]);
 
   // Debounced search handler
   const handleSearchInput = (value: string) => {
-    setLocalSearch(value);
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
@@ -128,6 +120,25 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
   const selectedPageSizeOption =
     pageSizeSelectOptions.find((o) => o.value === pageSize) ?? pageSizeSelectOptions[0] ?? null;
 
+  const { control, setValue } = useForm<{
+    tableSearch: string;
+    pageSize: Option<number> | null;
+  }>({
+    defaultValues: {
+      tableSearch: searchValue ?? '',
+      pageSize: selectedPageSizeOption,
+    },
+  });
+
+  // Sync when parent updates
+  useEffect(() => {
+    setValue('tableSearch', searchValue ?? '');
+  }, [searchValue, setValue]);
+
+  useEffect(() => {
+    setValue('pageSize', selectedPageSizeOption);
+  }, [selectedPageSizeOption, setValue]);
+
   const canPaginate = !!onPageChange;
   const pageItems = useMemo(() => buildPageItems(page, computedTotalPages), [page, computedTotalPages]);
 
@@ -151,7 +162,7 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
             <HrInput
               variant="text"
               name="tableSearch"
-              value={localSearch}
+              control={control}
               onChange={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
               placeholder={searchPlaceholder}
               icon={Search}
@@ -247,12 +258,9 @@ const HrTable = <TData,>(props: HrTableProps<TData>) => {
                 <HrSelectMenu<number>
                   name="pageSize"
                   options={pageSizeSelectOptions}
-                  value={selectedPageSizeOption}
-                  onChange={(
-                    value: SingleValue<Option<number>> | MultiValue<Option<number>>
-                  ) => {
-                    if (Array.isArray(value)) return;
-                    if (value) onPageSizeChange((value as Option<number>).value);
+                  control={control}
+                  onValueChange={(value: Option<number> | null) => {
+                    if (value) onPageSizeChange(value.value);
                   }}
                   isSearchable={false}
                   styles={{

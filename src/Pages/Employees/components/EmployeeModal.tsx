@@ -1,11 +1,18 @@
 import { X, User, Mail, Briefcase, Phone, MapPin } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import HrButton from '../../../uikit/HrButton/HrButton';
 import HrInput from '../../../uikit/HrInput/HrInput';
 import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
 import { currencyOptions, phoneCountryOptions } from '../../../data/mock';
 import { API_ENDPOINTS } from '../../../config/endpoints';
+import {
+  COUNTRY_DIAL_CODES,
+  CURRENCY_SYMBOLS,
+  guessCountryFromPhone,
+  stripDialCode,
+} from '../utils/employeeForm';
 import type { Employee } from '../types';
 
 interface EmployeeModalProps {
@@ -14,27 +21,64 @@ interface EmployeeModalProps {
   onSubmit: (employee: any) => void;
   employee?: Employee | null;
   mode?: 'add' | 'edit';
+  isSubmitting?: boolean;
+  error?: string | null;
 }
 
-const getInitialFormData = () => ({
+type EmployeeFormValues = {
+  fullName: string;
+  email: string;
+  role: string;
+  department: AsyncSelectOption | null;
+  joinDate: string;
+  phoneCountry: Option<string>;
+  phoneNumber: string;
+  address: string;
+  emergencyContact: string;
+  salary: string;
+  salaryCurrency: Option<string>;
+  branch: AsyncSelectOption | null;
+};
+
+const getInitialFormData = (): EmployeeFormValues => ({
   fullName: '',
   email: '',
   role: '',
-  department: null as AsyncSelectOption | null,
+  department: null,
   joinDate: '',
-  phoneCountry: phoneCountryOptions[0],
+  phoneCountry: phoneCountryOptions[0] as Option<string>,
   phoneNumber: '',
   address: '',
   emergencyContact: '',
   salary: '',
-  salaryCurrency: currencyOptions[0],
-  branch: null as AsyncSelectOption | null,
+  salaryCurrency: currencyOptions[0] as Option<string>,
+  branch: null,
 });
 
-const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: EmployeeModalProps) => {
-  const [formData, setFormData] = useState(getInitialFormData());
-
+const EmployeeModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  employee,
+  mode = 'add',
+  isSubmitting = false,
+  error = null,
+}: EmployeeModalProps) => {
   const isEditMode = mode === 'edit';
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<EmployeeFormValues>({
+    defaultValues: getInitialFormData(),
+    mode: 'onSubmit',
+  });
+
+  const phoneCountry = watch('phoneCountry');
+  const salaryCurrency = watch('salaryCurrency');
 
   // Populate form when editing
   useEffect(() => {
@@ -45,66 +89,32 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
       const branch: AsyncSelectOption | null = employee.branch_detail
         ? { value: employee.branch_detail.id, label: employee.branch_detail.name }
         : null;
+
+      const country = guessCountryFromPhone(employee.phone_number);
+      const dialCode = COUNTRY_DIAL_CODES[country] ?? COUNTRY_DIAL_CODES.US;
       
-      setFormData({
+      reset({
         fullName: employee.employee_name || '',
         email: employee.email || '',
         role: employee.role || '',
         department: dept,
         joinDate: employee.join_date || '',
-        phoneCountry: phoneCountryOptions[0],
-        phoneNumber: employee.phone_number || '',
+        phoneCountry:
+          (phoneCountryOptions.find((o) => o.value === country) ?? phoneCountryOptions[0]) as Option<string>,
+        phoneNumber: stripDialCode(employee.phone_number || '', dialCode),
         address: employee.address || '',
         emergencyContact: employee.emergency_contact || '',
         salary: employee.salary || '',
-        salaryCurrency: currencyOptions[0],
+        salaryCurrency: currencyOptions[0] as Option<string>,
         branch: branch,
       });
     } else if (isOpen && !isEditMode) {
-      setFormData(getInitialFormData());
+      reset(getInitialFormData());
     }
-  }, [isOpen, isEditMode, employee]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (name: string, value: Option | null) => {
-    if (value) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleAsyncSelectChange = (name: string, value: AsyncSelectOption | null) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Convert Option values back to strings for submission
-    const submitData = {
-      ...formData,
-      id: employee?.id,
-      department: formData.department?.value || null,
-      phoneCountry: formData.phoneCountry.value,
-      salaryCurrency: formData.salaryCurrency.value,
-      branch: formData.branch?.value || null,
-    };
-    onSubmit(submitData);
-  };
+  }, [isOpen, isEditMode, employee, reset]);
 
   const handleClose = () => {
-    setFormData(getInitialFormData());
+    reset(getInitialFormData());
     onClose();
   };
 
@@ -132,7 +142,26 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form
+          onSubmit={handleSubmit((values) => {
+            const dialCode = COUNTRY_DIAL_CODES[values.phoneCountry.value] ?? '';
+            onSubmit({
+              ...values,
+              id: employee?.id,
+              department: values.department?.value || null,
+              branch: values.branch?.value || null,
+              phoneCountry: values.phoneCountry.value,
+              salaryCurrency: values.salaryCurrency.value,
+              phoneNumber: `${dialCode}${values.phoneNumber}`,
+            });
+          })}
+          className="p-6"
+        >
+          {error ? (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-4">
@@ -140,30 +169,33 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 label="Full Name"
                 variant="text"
                 name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
+                control={control}
+                rules={{ required: 'Full name is required' }}
                 placeholder="Full Name"
                 required
                 icon={User}
                 iconPosition="left"
+                error={errors.fullName?.message}
               />
 
               <HrInput
                 label="Role"
                 variant="text"
                 name="role"
-                value={formData.role}
-                onChange={handleChange}
+                control={control}
+                rules={{ required: 'Role is required' }}
                 icon={Briefcase}
                 iconPosition="left"
+                error={errors.role?.message}
               />
 
               <HrInput
                 label="Join Date"
                 variant="date"
                 name="joinDate"
-                value={formData.joinDate}
-                onChange={handleChange}
+                control={control}
+                rules={{ required: 'Join date is required' }}
+                error={errors.joinDate?.message}
               />
 
               {/* Phone Number */}
@@ -173,20 +205,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 </label>
                 <div className="flex gap-2">
                   <div className="w-32">
-                    <HrSelectMenu
+                    <HrSelectMenu<string>
                       name="phoneCountry"
-                      options={phoneCountryOptions}
-                      value={formData.phoneCountry}
-                      onChange={(option) => handleSelectChange('phoneCountry', option as Option)}
+                      options={phoneCountryOptions as Option<string>[]}
+                      control={control as any}
+                      rules={{ required: 'Country is required' }}
                       isSearchable={false}
+                      error={(errors.phoneCountry as any)?.message}
                     />
                   </div>
                   <HrInput
                     variant="tel"
                     name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
+                    control={control}
+                    rules={{ required: 'Phone number is required' }}
                     containerClassName="flex-1"
+                    prefix={COUNTRY_DIAL_CODES[phoneCountry?.value] ?? ''}
+                    error={errors.phoneNumber?.message}
                   />
                 </div>
               </div>
@@ -195,8 +230,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 label="Address"
                 variant="textarea"
                 name="address"
-                value={formData.address}
-                onChange={handleChange}
+                control={control}
                 placeholder="Address"
                 rows={3}
                 icon={MapPin}
@@ -207,8 +241,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 label="Emergency Contact"
                 variant="text"
                 name="emergencyContact"
-                value={formData.emergencyContact}
-                onChange={handleChange}
+                control={control}
                 icon={Phone}
                 iconPosition="left"
               />
@@ -220,12 +253,16 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 label="Email"
                 variant="email"
                 name="email"
-                value={formData.email}
-                onChange={handleChange}
+                control={control}
+                rules={{
+                  required: 'Email is required',
+                  pattern: { value: /^\S+@\S+$/i, message: 'Enter a valid email' },
+                }}
                 placeholder="Email"
                 required
                 icon={Mail}
                 iconPosition="left"
+                error={errors.email?.message}
               />
 
               {/* Department */}
@@ -236,8 +273,9 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 endpoint={API_ENDPOINTS.DEPARTMENTS.LIST}
                 dataKey="items"
                 labelKey="name"
-                value={formData.department}
-                onChange={(option) => handleAsyncSelectChange('department', option)}
+                control={control as any}
+                rules={{ required: 'Department is required' }}
+                error={(errors.department as any)?.message}
               />
 
               {/* Salary */}
@@ -249,18 +287,20 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                   <HrInput
                     variant="number"
                     name="salary"
-                    value={formData.salary}
-                    onChange={handleChange}
-                    prefix="$"
+                    control={control}
+                    rules={{ required: 'Salary is required' }}
+                    prefix={CURRENCY_SYMBOLS[salaryCurrency?.value] ?? ''}
                     containerClassName="flex-1"
+                    error={errors.salary?.message}
                   />
                   <div className="w-32">
-                    <HrSelectMenu
+                    <HrSelectMenu<string>
                       name="salaryCurrency"
-                      options={currencyOptions}
-                      value={formData.salaryCurrency}
-                      onChange={(option) => handleSelectChange('salaryCurrency', option as Option)}
+                      options={currencyOptions as Option<string>[]}
+                      control={control as any}
+                      rules={{ required: 'Currency is required' }}
                       isSearchable={false}
+                      error={(errors.salaryCurrency as any)?.message}
                     />
                   </div>
                 </div>
@@ -274,8 +314,9 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
                 endpoint={API_ENDPOINTS.BRANCHES.LIST}
                 dataKey="items"
                 labelKey="name"
-                value={formData.branch}
-                onChange={(option) => handleAsyncSelectChange('branch', option)}
+                control={control as any}
+                rules={{ required: 'Branch is required' }}
+                error={(errors.branch as any)?.message}
               />
             </div>
           </div>
@@ -292,8 +333,9 @@ const EmployeeModal = ({ isOpen, onClose, onSubmit, employee, mode = 'add' }: Em
             <HrButton
               type="submit"
               variant="primary"
+              disabled={isSubmitting}
             >
-              {isEditMode ? 'Save Changes' : 'Add Employee'}
+              {isSubmitting ? 'Saving...' : isEditMode ? 'Save Changes' : 'Add Employee'}
             </HrButton>
           </div>
         </form>

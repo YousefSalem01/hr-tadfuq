@@ -3,11 +3,19 @@ import { api } from '../../../services/api';
 import { API_ENDPOINTS } from '../../../config/endpoints';
 import { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
 import { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
-import type { Employee, EmployeesResponse, EmployeesData } from '../types';
+import { useAuthStore } from '../../../store/authStore';
+import { toast } from 'react-hot-toast';
+import type { Employee, EmployeesResponse, EmployeesData, EmployeeFormData } from '../types';
 
 interface StatusApiItem {
   id: number;
   name: string;
+}
+
+function normalizePhoneNumber(input: string) {
+  const trimmed = (input ?? '').trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
 }
 
 export const useEmployees = () => {
@@ -23,11 +31,14 @@ export const useEmployees = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
+  const [submitEmployeeError, setSubmitEmployeeError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const userRole = useAuthStore((state) => state.user?.role);
 
   // Initial load: fetch employees and statuses in parallel
   useEffect(() => {
@@ -138,12 +149,55 @@ export const useEmployees = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleSubmitEmployee = useCallback((_employeeData: any) => {
-    // TODO: Implement add/edit employee API call
-    setIsModalOpen(false);
-    setSelectedEmployee(null);
-    fetchEmployees();
-  }, [fetchEmployees]);
+  const handleSubmitEmployee = useCallback(
+    async (employeeData: EmployeeFormData) => {
+      setSubmitEmployeeError(null);
+      setIsSubmittingEmployee(true);
+
+      try {
+        const payload = {
+          full_name: employeeData.fullName,
+          email: employeeData.email,
+          role: employeeData.role,
+          user_role: userRole,
+          phone_number: normalizePhoneNumber(employeeData.phoneNumber),
+          salary:
+            employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
+              ? undefined
+              : Number(employeeData.salary),
+          join_date: employeeData.joinDate,
+          address: employeeData.address,
+          emergency_contact: employeeData.emergencyContact,
+          department: employeeData.department ?? null,
+          branch: employeeData.branch ?? null,
+        };
+
+        const response =
+          modalMode === 'edit' && employeeData.id
+            ? await api.put<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(employeeData.id), payload)
+            : await api.post<any>(API_ENDPOINTS.EMPLOYEES.LIST, payload);
+
+        if (response && typeof response === 'object' && 'success' in response && response.success === false) {
+          throw new Error((response as any).message || 'Failed to save employee');
+        }
+
+        const successMessage = response.message;
+        toast.success(successMessage);
+
+        setIsModalOpen(false);
+        setSelectedEmployee(null);
+        fetchEmployees();
+      } catch (err: any) {
+        console.error('Employee submit error:', err);
+        const msg = err.response?.data?.message || err.message || 'Failed to save employee';
+        setSubmitEmployeeError(msg);
+        toast.error(msg);
+      } finally {
+        setIsSubmittingEmployee(false);
+      }
+    },
+    [fetchEmployees, modalMode, userRole]
+  );
 
   const handleDeleteClick = useCallback((employee: Employee) => {
     setSelectedEmployee(employee);
@@ -162,18 +216,21 @@ export const useEmployees = () => {
   const openAddModal = useCallback(() => {
     setSelectedEmployee(null);
     setModalMode('add');
+    setSubmitEmployeeError(null);
     setIsModalOpen(true);
   }, []);
 
   const openEditModal = useCallback((employee: Employee) => {
     setSelectedEmployee(employee);
     setModalMode('edit');
+    setSubmitEmployeeError(null);
     setIsModalOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedEmployee(null);
+    setSubmitEmployeeError(null);
   }, []);
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
@@ -242,6 +299,8 @@ export const useEmployees = () => {
       employee: {
         isOpen: isModalOpen,
         mode: modalMode,
+        isSubmitting: isSubmittingEmployee,
+        error: submitEmployeeError,
       },
       delete: {
         isOpen: isDeleteModalOpen,

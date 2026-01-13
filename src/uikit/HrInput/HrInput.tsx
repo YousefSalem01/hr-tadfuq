@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, TextareaHTMLAttributes, useState, forwardRef } from 'react';
 import { LucideIcon, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Control, Controller, RegisterOptions } from 'react-hook-form';
 
 // Base props shared across all input types
 interface BaseInputProps {
@@ -12,6 +13,8 @@ interface BaseInputProps {
   prefix?: string;
   suffix?: string;
   containerClassName?: string;
+  control: Control<any>;
+  rules?: RegisterOptions;
 }
 
 // Text/Email/Number/Tel/Date Input Props
@@ -30,7 +33,7 @@ interface TextareaInputProps extends BaseInputProps, TextareaHTMLAttributes<HTML
 type HrInputProps = TextInputProps | TextareaInputProps;
 
 const HrInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, HrInputProps>(
-  (props, ref) => {
+  (props, _ref) => {
     const {
       label,
       required = false,
@@ -43,6 +46,8 @@ const HrInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, HrInputProps>
       containerClassName = '',
       variant = 'text',
       className = '',
+      control,
+      rules,
       ...restProps
     } = props;
 
@@ -133,32 +138,59 @@ const HrInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, HrInputProps>
       );
     };
 
-    // Render input based on variant
+    const inputType = variant === 'password' && showPassword ? 'text' : variant;
+    const fieldName = (restProps as any).name as string;
+
+    // Render input based on variant (RHF Controller only)
     const renderInput = () => {
-      const inputType = variant === 'password' && showPassword ? 'text' : variant;
-
-      if (variant === 'textarea') {
-        const textareaProps = restProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
-        return (
-          <textarea
-            ref={ref as React.Ref<HTMLTextAreaElement>}
-            className={`${inputClasses} resize-none`}
-            rows={(props as TextareaInputProps).rows || 4}
-            required={required}
-            {...textareaProps}
-          />
-        );
-      }
-
-      // Default: text, email, number, date, tel, password
-      const inputProps = restProps as InputHTMLAttributes<HTMLInputElement>;
       return (
-        <input
-          ref={ref as React.Ref<HTMLInputElement>}
-          type={inputType}
-          className={inputClasses}
-          required={required}
-          {...inputProps}
+        <Controller
+          name={fieldName}
+          control={control}
+          rules={rules}
+          render={({ field }) => {
+            if (variant === 'textarea') {
+              const textareaProps = restProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
+              return (
+                <textarea
+                  ref={field.ref}
+                  className={`${inputClasses} resize-none`}
+                  rows={(props as TextareaInputProps).rows || 4}
+                  required={required}
+                  {...textareaProps}
+                  value={(field.value ?? '') as any}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    textareaProps.onChange?.(e);
+                  }}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    textareaProps.onBlur?.(e);
+                  }}
+                />
+              );
+            }
+
+            const inputProps = restProps as InputHTMLAttributes<HTMLInputElement>;
+            return (
+              <input
+                ref={field.ref}
+                type={inputType}
+                className={inputClasses}
+                required={required}
+                {...inputProps}
+                value={(field.value ?? '') as any}
+                onChange={(e) => {
+                  field.onChange(e);
+                  inputProps.onChange?.(e);
+                }}
+                onBlur={(e) => {
+                  field.onBlur();
+                  inputProps.onBlur?.(e);
+                }}
+              />
+            );
+          }}
         />
       );
     };

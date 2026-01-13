@@ -66,6 +66,8 @@ const Employees = () => {
         onSubmit={actions.submitEmployee}
         employee={selection.employee}
         mode={modals.employee.mode}
+        isSubmitting={modals.employee.isSubmitting}
+        error={modals.employee.error}
       />
 
       {/* Delete Confirmation Modal */}

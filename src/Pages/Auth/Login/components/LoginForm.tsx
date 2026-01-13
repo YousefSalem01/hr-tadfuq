@@ -6,6 +6,7 @@ import type { LoginFormData, LoginFormProps } from '../types';
 const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
@@ -23,29 +24,33 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
         <HrInput
           label="Email Address"
           variant="email"
-          placeholder="Enter your email"
-          icon={Mail}
-          iconPosition="left"
-          error={errors.email?.message}
-          {...register('email', {
+          name="email"
+          control={control}
+          rules={{
             required: 'Email is required',
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
               message: 'Invalid email address',
             },
-          })}
+          }}
+          placeholder="Enter your email"
+          icon={Mail}
+          iconPosition="left"
+          error={errors.email?.message}
         />
 
         {/* Password Field */}
         <HrInput
           label="Password"
           variant="password"
+          name="password"
+          control={control}
+          rules={{ required: 'Password is required' }}
           placeholder="Enter your password"
           icon={Lock}
           iconPosition="left"
           showPasswordToggle
           error={errors.password?.message}
-          {...register('password')}
         />
 
         {/* Remember Me and Forgot Password */}

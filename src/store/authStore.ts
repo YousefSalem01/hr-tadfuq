@@ -36,17 +36,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         try {
           await api.post(API_ENDPOINTS.AUTH.LOGOUT);
         } catch (error) {
           console.error('Logout error:', error);
-        } finally {
-          set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         }
       },
 
       setTokens: (accessToken, refreshToken) => {
-        set({ accessToken, refreshToken });
+        set({ accessToken, refreshToken, isAuthenticated: Boolean(accessToken) });
       },
     }),
     {
