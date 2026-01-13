@@ -41,9 +41,6 @@ const AttendanceFilters = ({
 
   return (
     <div className="flex items-center gap-3">
-      <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-        <Filter size={20} className="text-gray-600" />
-      </button>
       <div className="w-48">
         <HrAsyncSelectMenu
           name="department"
