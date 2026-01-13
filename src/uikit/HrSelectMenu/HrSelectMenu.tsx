@@ -18,9 +18,11 @@ interface BaseProps<TValue> {
   required?: boolean;
   helperText?: string;
   isDisabled?: boolean;
-  control: Control<any>;
+  control?: Control<any>;
   rules?: RegisterOptions;
   onValueChange?: (value: any) => void;
+  value?: any;
+  onChange?: (value: any) => void;
 }
 
 type HrSelectMenuProps<TValue> = BaseProps<TValue> &
@@ -42,6 +44,8 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
     control,
     rules,
     onValueChange,
+    value,
+    onChange,
     ...rest 
   } = props as any;
 
@@ -96,7 +100,7 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
     }),
   };
 
-  const ControlledElement = (
+  const ControlledElement = control ? (
     <Controller
       name={name}
       control={control}
@@ -123,6 +127,26 @@ const HrSelectMenu = <TValue = string,>(props: HrSelectMenuProps<TValue>) => {
           {...(rest as any)}
         />
       )}
+    />
+  ) : (
+    <Select
+      inputId={name}
+      isMulti={isMulti}
+      isSearchable={isSearchable}
+      options={options}
+      classNamePrefix="react-select"
+      className={className}
+      placeholder={placeholder}
+      value={value}
+      onChange={(v) => {
+        onChange?.(v);
+        onValueChange?.(v);
+      }}
+      isDisabled={isDisabled}
+      menuPortalTarget={document.body}
+      menuPosition="fixed"
+      styles={customStyles}
+      {...(rest as any)}
     />
   );
 

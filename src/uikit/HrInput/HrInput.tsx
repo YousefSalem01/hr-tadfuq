@@ -13,7 +13,7 @@ interface BaseInputProps {
   prefix?: string;
   suffix?: string;
   containerClassName?: string;
-  control: Control<any>;
+  control?: Control<any>;
   rules?: RegisterOptions;
 }
 
@@ -141,56 +141,81 @@ const HrInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, HrInputProps>
     const inputType = variant === 'password' && showPassword ? 'text' : variant;
     const fieldName = (restProps as any).name as string;
 
-    // Render input based on variant (RHF Controller only)
+    // Render input based on variant
     const renderInput = () => {
-      return (
-        <Controller
-          name={fieldName}
-          control={control}
-          rules={rules}
-          render={({ field }) => {
-            if (variant === 'textarea') {
-              const textareaProps = restProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
+      if (control) {
+        return (
+          <Controller
+            name={fieldName}
+            control={control}
+            rules={rules}
+            render={({ field }) => {
+              if (variant === 'textarea') {
+                const textareaProps = restProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
+                return (
+                  <textarea
+                    ref={field.ref}
+                    className={`${inputClasses} resize-none`}
+                    rows={(props as TextareaInputProps).rows || 4}
+                    required={required}
+                    {...textareaProps}
+                    value={(field.value ?? '') as any}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      textareaProps.onChange?.(e);
+                    }}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      textareaProps.onBlur?.(e);
+                    }}
+                  />
+                );
+              }
+
+              const inputProps = restProps as InputHTMLAttributes<HTMLInputElement>;
               return (
-                <textarea
+                <input
                   ref={field.ref}
-                  className={`${inputClasses} resize-none`}
-                  rows={(props as TextareaInputProps).rows || 4}
+                  type={inputType}
+                  className={inputClasses}
                   required={required}
-                  {...textareaProps}
+                  {...inputProps}
                   value={(field.value ?? '') as any}
                   onChange={(e) => {
                     field.onChange(e);
-                    textareaProps.onChange?.(e);
+                    inputProps.onChange?.(e);
                   }}
                   onBlur={(e) => {
                     field.onBlur();
-                    textareaProps.onBlur?.(e);
+                    inputProps.onBlur?.(e);
                   }}
                 />
               );
-            }
+            }}
+          />
+        );
+      }
 
-            const inputProps = restProps as InputHTMLAttributes<HTMLInputElement>;
-            return (
-              <input
-                ref={field.ref}
-                type={inputType}
-                className={inputClasses}
-                required={required}
-                {...inputProps}
-                value={(field.value ?? '') as any}
-                onChange={(e) => {
-                  field.onChange(e);
-                  inputProps.onChange?.(e);
-                }}
-                onBlur={(e) => {
-                  field.onBlur();
-                  inputProps.onBlur?.(e);
-                }}
-              />
-            );
-          }}
+      // Uncontrolled usage
+      if (variant === 'textarea') {
+        const textareaProps = restProps as TextareaHTMLAttributes<HTMLTextAreaElement>;
+        return (
+          <textarea
+            className={`${inputClasses} resize-none`}
+            rows={(props as TextareaInputProps).rows || 4}
+            required={required}
+            {...textareaProps}
+          />
+        );
+      }
+
+      const inputProps = restProps as InputHTMLAttributes<HTMLInputElement>;
+      return (
+        <input
+          type={inputType}
+          className={inputClasses}
+          required={required}
+          {...inputProps}
         />
       );
     };
