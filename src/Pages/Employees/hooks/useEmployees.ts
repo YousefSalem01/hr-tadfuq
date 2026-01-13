@@ -156,28 +156,82 @@ export const useEmployees = () => {
       setIsSubmittingEmployee(true);
 
       try {
-        const payload = {
-          full_name: employeeData.fullName,
-          email: employeeData.email,
-          role: employeeData.role,
-          user_role: userRole,
-          phone_number: normalizePhoneNumber(employeeData.phoneNumber),
-          salary:
-            employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
-              ? undefined
-              : Number(employeeData.salary),
-          salary_currency: employeeData.salaryCurrency || 'USD',
-          join_date: employeeData.joinDate,
-          address: employeeData.address,
-          emergency_contact: employeeData.emergencyContact,
-          department: employeeData.department ?? null,
-          branch: employeeData.branch ?? null,
-        };
+        let payload: any;
+        let response: any;
 
-        const response =
-          modalMode === 'edit' && employeeData.id
-            ? await api.put<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(employeeData.id), payload)
-            : await api.post<any>(API_ENDPOINTS.EMPLOYEES.LIST, payload);
+        if (modalMode === 'edit' && employeeData.id && selectedEmployee) {
+          // For PATCH: Only send changed fields
+          const changes: any = {};
+          
+          // Compare and add only changed fields
+          if (employeeData.fullName !== selectedEmployee.employee_name) {
+            changes.full_name = employeeData.fullName;
+          }
+          if (employeeData.email !== selectedEmployee.email) {
+            changes.email = employeeData.email;
+          }
+          if (employeeData.role !== selectedEmployee.role) {
+            changes.role = employeeData.role;
+          }
+          if (normalizePhoneNumber(employeeData.phoneNumber) !== selectedEmployee.phone_number) {
+            changes.phone_number = normalizePhoneNumber(employeeData.phoneNumber);
+          }
+          if (Number(employeeData.salary) !== Number(selectedEmployee.salary)) {
+            changes.salary = employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
+              ? undefined
+              : Number(employeeData.salary);
+          }
+          if (employeeData.salaryCurrency !== selectedEmployee.salary_currency) {
+            changes.salary_currency = employeeData.salaryCurrency || 'USD';
+          }
+          if (employeeData.joinDate !== selectedEmployee.join_date) {
+            changes.join_date = employeeData.joinDate;
+          }
+          if (employeeData.address !== selectedEmployee.address) {
+            changes.address = employeeData.address;
+          }
+          if (employeeData.emergencyContact !== selectedEmployee.emergency_contact) {
+            changes.emergency_contact = employeeData.emergencyContact;
+          }
+          if (employeeData.department !== selectedEmployee.department) {
+            changes.department = employeeData.department ?? null;
+          }
+          if (employeeData.branch !== selectedEmployee.branch) {
+            changes.branch = employeeData.branch ?? null;
+          }
+
+          // Only send request if there are changes
+          if (Object.keys(changes).length === 0) {
+            toast('No changes detected');
+            setIsModalOpen(false);
+            setSelectedEmployee(null);
+            setIsSubmittingEmployee(false);
+            return;
+          }
+
+          response = await api.patch<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(employeeData.id), changes);
+        } else {
+          // For POST: Send all fields
+          payload = {
+            full_name: employeeData.fullName,
+            email: employeeData.email,
+            role: employeeData.role,
+            user_role: userRole,
+            phone_number: normalizePhoneNumber(employeeData.phoneNumber),
+            salary:
+              employeeData.salary === '' || employeeData.salary === null || employeeData.salary === undefined
+                ? undefined
+                : Number(employeeData.salary),
+            salary_currency: employeeData.salaryCurrency || 'USD',
+            join_date: employeeData.joinDate,
+            address: employeeData.address,
+            emergency_contact: employeeData.emergencyContact,
+            department: employeeData.department ?? null,
+            branch: employeeData.branch ?? null,
+          };
+
+          response = await api.post<any>(API_ENDPOINTS.EMPLOYEES.LIST, payload);
+        }
 
         if (response && typeof response === 'object' && 'success' in response && response.success === false) {
           throw new Error((response as any).message || 'Failed to save employee');
@@ -225,7 +279,7 @@ export const useEmployees = () => {
         setIsSubmittingEmployee(false);
       }
     },
-    [fetchEmployees, modalMode, userRole]
+    [fetchEmployees, modalMode, userRole, selectedEmployee]
   );
 
   const handleDeleteClick = useCallback((employee: Employee) => {
@@ -233,12 +287,24 @@ export const useEmployees = () => {
     setIsDeleteModalOpen(true);
   }, []);
 
-  const handleDeleteConfirm = useCallback(() => {
-    if (selectedEmployee) {
-      // TODO: Implement delete employee API call
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!selectedEmployee) return;
+
+    try {
+      const response = await api.delete<any>(API_ENDPOINTS.EMPLOYEES.DETAIL(selectedEmployee.id));
+
+      if (response && typeof response === 'object' && 'success' in response && response.success === false) {
+        throw new Error((response as any).message || 'Failed to delete employee');
+      }
+
+      toast.success(response.message || 'Employee deleted successfully');
       setIsDeleteModalOpen(false);
       setSelectedEmployee(null);
       fetchEmployees();
+    } catch (err: any) {
+      console.error('Delete employee error:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to delete employee';
+      toast.error(errorMsg);
     }
   }, [selectedEmployee, fetchEmployees]);
 
