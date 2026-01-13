@@ -4,7 +4,7 @@ import SummaryCards from './components/SummaryCards';
 import EmployeesFilters from './components/EmployeesFilters';
 import EmployeesTable from './components/EmployeesTable';
 import HrButton from '../../uikit/HrButton/HrButton';
-import EmployeeModal from '../../uikit/EmployeeModal';
+import EmployeeModal from './components/EmployeeModal';
 import HrConfirmationModal from '../../uikit/HrConfirmationModal/HrConfirmationModal';
 import ImportEmployeesModal from './components/ImportEmployeesModal';
 

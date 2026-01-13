@@ -1,12 +1,12 @@
 import { X, User, Mail, Briefcase, Phone, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import HrButton from './HrButton/HrButton';
-import HrInput from './HrInput/HrInput';
-import HrSelectMenu, { Option } from './HrSelectMenu/HrSelectMenu';
-import HrAsyncSelectMenu, { AsyncSelectOption } from './HrAsyncSelectMenu/HrAsyncSelectMenu';
-import { currencyOptions, phoneCountryOptions } from '../data/mock';
-import { endpoints } from '../config/endpoints';
-import type { Employee } from '../Pages/Employees/types';
+import HrButton from '../../../uikit/HrButton/HrButton';
+import HrInput from '../../../uikit/HrInput/HrInput';
+import HrSelectMenu, { Option } from '../../../uikit/HrSelectMenu/HrSelectMenu';
+import HrAsyncSelectMenu, { AsyncSelectOption } from '../../../uikit/HrAsyncSelectMenu/HrAsyncSelectMenu';
+import { currencyOptions, phoneCountryOptions } from '../../../data/mock';
+import { endpoints } from '../../../config/endpoints';
+import type { Employee } from '../types';
 
 interface EmployeeModalProps {
   isOpen: boolean;
