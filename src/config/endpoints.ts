@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string | number) => `/api/employees/${id}`,
     STATUSES: '/api/employees/statuses',
     IMPORT: '/api/employees/import',
+    EXPORT: '/api/employees/export',
   },
 
   // Departments endpoints

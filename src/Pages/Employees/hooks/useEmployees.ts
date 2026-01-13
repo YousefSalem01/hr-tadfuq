@@ -37,6 +37,7 @@ export const useEmployees = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const userRole = useAuthStore((state) => state.user?.role);
 
@@ -266,6 +267,44 @@ export const useEmployees = () => {
     }
   }, [fetchEmployees]);
 
+  const handleExportEmployees = useCallback(async () => {
+    setIsExporting(true);
+
+    try {
+      const response = await api.get<{
+        success: boolean;
+        message: string;
+        data: {
+          download_url: string;
+          filename: string;
+          format: string;
+          total_records: number;
+        };
+      }>(API_ENDPOINTS.EMPLOYEES.EXPORT);
+
+      if (response.success && response.data.download_url) {
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = response.data.download_url;
+        link.download = response.data.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Show success message
+        toast.success(response.message || `Successfully exported ${response.data.total_records} employees`);
+      } else {
+        throw new Error(response.message || 'Failed to export employees');
+      }
+    } catch (err: any) {
+      console.error('Export error:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to export employees';
+      toast.error(errorMsg);
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
   return {
     employees: {
       items: data?.items || [],
@@ -310,6 +349,9 @@ export const useEmployees = () => {
         isLoading: isImporting,
         error: importError,
       },
+      export: {
+        isLoading: isExporting,
+      },
     },
 
     selection: {
@@ -328,6 +370,7 @@ export const useEmployees = () => {
       deleteClick: handleDeleteClick,
       deleteConfirm: handleDeleteConfirm,
       importEmployees: handleImportEmployees,
+      exportEmployees: handleExportEmployees,
       refetch: fetchEmployees,
     },
   };

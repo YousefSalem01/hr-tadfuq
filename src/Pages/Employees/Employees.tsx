@@ -20,8 +20,13 @@ const Employees = () => {
           <p className="text-sm text-gray-500 mt-1">Manage your workforce</p>
         </div>
         <div className="flex items-center gap-3">
-          <HrButton variant="secondary" icon={Download}>
-            Export Report
+          <HrButton 
+            variant="secondary" 
+            icon={Download}
+            onClick={actions.exportEmployees}
+            disabled={modals.export.isLoading}
+          >
+            {modals.export.isLoading ? 'Exporting...' : 'Export Report'}
           </HrButton>
           <HrButton variant="secondary" icon={Upload} onClick={actions.openImportModal}>
             Import Data
