@@ -73,7 +73,8 @@ export function useEmployeeMutations() {
     mutationFn: async (file: File) => {
       return importEmployeesFile(file);
     },
-    onSuccess: async () => {
+    onSuccess: async (res: any) => {
+      toast.success(res?.message || 'Employees imported successfully');
       await invalidateEmployeesList();
     },
     onError: (err: any) => {
