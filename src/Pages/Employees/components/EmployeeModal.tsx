@@ -18,11 +18,10 @@ import type { Employee } from '../types';
 interface EmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (employee: any) => Promise<void>;
+  onSubmit: (employee: any, setFormError?: (field: string, message: string) => void) => Promise<void>;
   employee?: Employee | null;
   mode?: 'add' | 'edit';
   isSubmitting?: boolean;
-  error?: string | null;
 }
 
 type EmployeeFormValues = {
@@ -62,7 +61,6 @@ const EmployeeModal = ({
   employee,
   mode = 'add',
   isSubmitting = false,
-  error = null,
 }: EmployeeModalProps) => {
   const isEditMode = mode === 'edit';
 
@@ -149,9 +147,9 @@ const EmployeeModal = ({
         {/* Form */}
         <form
           onSubmit={handleSubmit(async (values) => {
-            try {
-              const dialCode = COUNTRY_DIAL_CODES[values.phoneCountry.value] ?? '';
-              await onSubmit({
+            const dialCode = COUNTRY_DIAL_CODES[values.phoneCountry.value] ?? '';
+            await onSubmit(
+              {
                 ...values,
                 id: employee?.id,
                 department: values.department?.value || null,
@@ -159,35 +157,11 @@ const EmployeeModal = ({
                 phoneCountry: values.phoneCountry.value,
                 salaryCurrency: values.salaryCurrency.value,
                 phoneNumber: `${dialCode}${values.phoneNumber}`,
-              });
-            } catch (err: any) {
-              // Handle field-specific errors from API
-              if (err.response?.data?.errors) {
-                const apiErrors = err.response.data.errors;
-                Object.keys(apiErrors).forEach((field) => {
-                  const message = Array.isArray(apiErrors[field]) 
-                    ? apiErrors[field][0] 
-                    : apiErrors[field];
-                  
-                  // Map API field names to form field names
-                  const fieldMap: Record<string, any> = {
-                    'full_name': 'fullName',
-                    'email': 'email',
-                    'role': 'role',
-                    'phone_number': 'phoneNumber',
-                    'salary': 'salary',
-                    'join_date': 'joinDate',
-                    'address': 'address',
-                    'emergency_contact': 'emergencyContact',
-                    'department': 'department',
-                    'branch': 'branch',
-                  };
-                  
-                  const formField = fieldMap[field] || field;
-                  setError(formField, { type: 'manual', message });
-                });
+              },
+              (field: string, message: string) => {
+                setError(field as any, { type: 'manual', message });
               }
-            }
+            );
           })}
           className="p-6"
         >

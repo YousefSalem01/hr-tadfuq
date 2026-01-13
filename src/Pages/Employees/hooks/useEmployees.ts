@@ -151,7 +151,7 @@ export const useEmployees = () => {
   }, []);
 
   const handleSubmitEmployee = useCallback(
-    async (employeeData: EmployeeFormData) => {
+    async (employeeData: EmployeeFormData, setFormError?: (field: string, message: string) => void) => {
       setSubmitEmployeeError(null);
       setIsSubmittingEmployee(true);
 
@@ -191,13 +191,36 @@ export const useEmployees = () => {
         fetchEmployees();
       } catch (err: any) {
         console.error('Employee submit error:', err);
-        if (err.response?.data?.errors) {
-          setIsSubmittingEmployee(false);
-          throw err;
+        
+        // Handle field-specific validation errors
+        if (err.response?.data?.errors && setFormError) {
+          const apiErrors = err.response.data.errors;
+          const fieldMap: Record<string, string> = {
+            'full_name': 'fullName',
+            'email': 'email',
+            'role': 'role',
+            'phone_number': 'phoneNumber',
+            'salary': 'salary',
+            'join_date': 'joinDate',
+            'address': 'address',
+            'emergency_contact': 'emergencyContact',
+            'department': 'department',
+            'branch': 'branch',
+          };
+
+          Object.keys(apiErrors).forEach((field) => {
+            const message = Array.isArray(apiErrors[field]) 
+              ? apiErrors[field][0] 
+              : apiErrors[field];
+            const formField = fieldMap[field] || field;
+            setFormError(formField, message);
+          });
+        } else {
+          // Handle general errors
+          const msg = err.response?.data?.message || err.message || 'Failed to save employee';
+          setSubmitEmployeeError(msg);
+          toast.error(msg);
         }
-        const msg = err.response?.data?.message || err.message || 'Failed to save employee';
-        setSubmitEmployeeError(msg);
-        toast.error(msg);
       } finally {
         setIsSubmittingEmployee(false);
       }
