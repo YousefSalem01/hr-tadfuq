@@ -100,6 +100,7 @@ export const attendanceStatusFilterOptions: SelectOption[] = [
   { value: 'Late', label: 'Late' },
   { value: 'Remote', label: 'Remote' },
   { value: 'Absent', label: 'Absent' },
+  { value: 'On Leave', label: 'On Leave' },
 ];
 
 export const departmentFilterOptions: SelectOption[] = [
